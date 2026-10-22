@@ -1,0 +1,26 @@
+.dock { position: fixed; right: max(14px, env(safe-area-inset-right)); bottom: max(14px, env(safe-area-inset-bottom)); z-index: 60; display: grid; justify-items: end; gap: 10px; pointer-events: none; }
+.dock__pi { pointer-events: auto; border-radius: 50%; transform: translateY(140%) scale(.6); opacity: 0; transition: transform 700ms var(--ease-spring), opacity 400ms; }
+.dock.is-visible .dock__pi { transform: none; opacity: 1; }
+.dock__pi:hover .pi__svg { transform: scale(1.06) rotate(-4deg); }
+.dock__pi .pi__svg { transition: transform var(--dur-3) var(--ease-spring); }
+.dock__pi .pi__bubble { min-width: 210px; right: 70%; text-align: left; }
+.dock__menu { display: grid; gap: 8px; justify-items: end; }
+.dock__menu button {
+  pointer-events: none;
+  display: inline-flex; align-items: center; gap: 10px;
+  min-height: 46px; padding: 0 18px;
+  border-radius: var(--r-pill);
+  background: var(--glass-strong); border: 1px solid var(--border-strong);
+  backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-1);
+  font-weight: 700; color: var(--fg-strong);
+  opacity: 0; transform: translateY(20px) scale(.8);
+  transition: opacity 260ms var(--ease-out), transform 460ms var(--ease-spring), border-color var(--dur-2);
+  transition-delay: calc((3 - var(--i)) * 30ms);
+}
+.dock.is-open .dock__menu button { pointer-events: auto; opacity: 1; transform: none; transition-delay: calc((3 - var(--i)) * 45ms); }
+.dock__menu button:hover { border-color: var(--accent); }
+@media (max-width: 640px) {
+  .dock__pi .pi { --size: 60px !important; }
+  .dock__pi .pi__bubble { display: none; }
+}

@@ -1,0 +1,10 @@
+.roll { display: inline-flex; align-items: baseline; font-variant-numeric: tabular-nums; line-height: 1; }
+.roll__col { display: inline-block; height: 1em; overflow: hidden; position: relative; }
+.roll__drum { display: flex; flex-direction: column; transform: translateY(calc(var(--d) * -1em)); transition: transform 900ms var(--ease-spring); }
+.roll__drum span { height: 1em; line-height: 1; }
+.roll__col:nth-last-child(2) .roll__drum { transition-delay: 0ms; }
+.roll__col:nth-last-child(3) .roll__drum { transition-delay: 40ms; }
+.roll__col:nth-last-child(4) .roll__drum { transition-delay: 80ms; }
+.roll__col:nth-last-child(5) .roll__drum { transition-delay: 120ms; }
+.roll__sep { display: inline-block; }
+.roll__suf { margin-left: .18em; font-size: .42em; font-weight: 700; color: var(--fg-mid); letter-spacing: 0; }
