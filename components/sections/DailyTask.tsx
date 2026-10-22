@@ -30,7 +30,9 @@ function burst(canvas: HTMLCanvasElement | null) {
   canvas.width = r.width * dpr;
   canvas.height = r.height * dpr;
   ctx.scale(dpr, dpr);
-  const colors = ["#FFC857", "#7BE7F0", "#FFFFFF", "#4BE3A6", "#FF8A7A"];
+  /* barwy konfetti z tokenów motywu */
+  const cs = getComputedStyle(document.documentElement);
+  const colors = ["--sun-400", "--sea-300", "--board-ink", "--mint-400", "--coral-400"].map((v) => cs.getPropertyValue(v).trim()).filter(Boolean);
   const parts = Array.from({ length: 90 }, () => ({
     x: r.width / 2, y: r.height * 0.55,
     vx: (Math.random() - 0.5) * 14, vy: -Math.random() * 13 - 4,

@@ -8,21 +8,23 @@ import "./pidock.css";
 /* Pi w rogu: pojawia się po nagłówku, podpowiada jednym zdaniem, co da się zrobić w sekcji,
    którą właśnie oglądasz, a po kliknięciu rozkłada skróty do najważniejszych akcji. */
 const HINTS: Record<string, { say: string; mood: MascotMood }> = {
-  "o-mnie": { say: "Przesuń kursor po zdjęciu — ono to lubi.", mood: "idle" },
-  wspolpraca: { say: "Kliknij numer kroku, a przeskoczę do niego.", mood: "wave" },
-  quiz: { say: "60 sekund i będę wiedzieć, od czego zacząć.", mood: "think" },
-  cennik: { say: "Przesuń suwak — cena przeliczy się na żywo.", mood: "wow" },
+  oferta: { say: "Przełącz Matematyka | Chemia — i wybierz poziom.", mood: "wave" },
+  korzysci: { say: "Zaznacz, na czym Ci zależy.", mood: "idle" },
+  "o-mnie": { say: "Stuknij w portret.", mood: "happy" },
+  opinie: { say: "Pod każdą opinią jest jej oryginał.", mood: "idle" },
   zadanie: { say: "Masz minutkę? Rozwiąż dzisiejsze zadanie.", mood: "think" },
-  opinie: { say: "Przeciągnij karty w bok, żeby czytać dalej.", mood: "idle" },
+  quiz: { say: "60 sekund i będę wiedzieć, od czego zacząć.", mood: "think" },
+  cennik: { say: "Ułóż plan — długość i liczba spotkań.", mood: "wow" },
   rezerwacja: { say: "Trzy kroki i termin jest Twój.", mood: "happy" },
-  kontakt: { say: "Napisz — odpowiadam na każdą wiadomość.", mood: "wave" },
+  faq: { say: "Stuknij pytanie, a odpowiedź się pojawi.", mood: "idle" },
+  kontakt: { say: "Napisz albo zadzwoń — jak wygodniej.", mood: "wave" },
 };
 
 const ACTIONS = [
-  { id: "rezerwacja", label: "Zarezerwuj", icon: "📅" },
+  { id: "kontakt", label: "Zapytaj o zajęcia", icon: "✉️" },
+  { id: "oferta", label: "Oferta", icon: "📚" },
   { id: "quiz", label: "Quiz 60 s", icon: "⏱️" },
-  { id: "cennik", label: "Policz cenę", icon: "🧮" },
-  { id: "kontakt", label: "Napisz", icon: "✉️" },
+  { id: "rezerwacja", label: "Zarezerwuj", icon: "📅" },
 ];
 
 export default function PiDock() {
@@ -75,7 +77,7 @@ export default function PiDock() {
         className="dock__pi"
         onClick={() => { setOpen((v) => !v); setBubble(false); }}
         aria-expanded={open}
-        aria-label={open ? "Zamknij skróty" : "Skróty: rezerwacja, quiz, cennik, kontakt"}
+        aria-label={open ? "Zamknij skróty" : "Skróty: kontakt, oferta, quiz, rezerwacja"}
       >
         <Mascot mood={open ? "happy" : hint?.mood || "idle"} size={78} say={bubble && hint && !open ? hint.say : undefined} side="right" />
       </button>

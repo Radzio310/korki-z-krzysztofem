@@ -12,7 +12,7 @@ type Overview = {
   counts: { bookings_pending: number; bookings_upcoming: number; reviews_pending: number; messages_unread: number; tasks_active: number; quiz_active: number };
   upcoming: Booking[];
   recent_bookings: Booking[];
-  recent_messages: { id: number; name: string; email: string; message: string; read: boolean; created_at: string }[];
+  recent_messages: { id: number; name: string; email?: string | null; message?: string | null; subjects?: string[] | null; read: boolean; created_at: string }[];
 };
 type Me = { login: string; email_configured: boolean; notify_email_configured: boolean };
 type Avail = { rules: unknown[]; time_off: unknown[] };
@@ -103,7 +103,7 @@ export default function Dashboard({ go }: { go: (t: TabId) => void }) {
               {data.recent_messages.map((m) => (
                 <li key={m.id} className={m.read ? "" : "is-new"}>
                   <b>{m.name}</b> <small className="muted">{fmtLong(m.created_at)}, {fmtTime(m.created_at)}</small>
-                  <p>{m.message.length > 140 ? `${m.message.slice(0, 140)}…` : m.message}</p>
+                  <p>{(() => { const t = m.message || (m.subjects?.length ? `Zapytanie: ${m.subjects.join(", ")}` : "Zapytanie bez wiadomości"); return t.length > 140 ? `${t.slice(0, 140)}…` : t; })()}</p>
                 </li>
               ))}
             </ul>

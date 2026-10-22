@@ -72,7 +72,17 @@
 .pricing__rows dd { margin: 0; font-weight: 800; color: var(--fg-strong); }
 .pricing__fine { font-size: 12.5px; }
 .pricing__cta { margin-top: auto; width: 100%; }
-.pricing__nop { display: grid; gap: 18px; justify-items: center; text-align: center; padding: 28px 0 8px; }
+.pricing__nop { position: relative; display: grid; gap: 14px; justify-items: start; padding: 4px 0 8px; }
+.pricing__indiv {
+  font: 800 clamp(40px, 5vw, 66px)/.95 var(--font-display); letter-spacing: -.035em;
+  background: var(--btn-primary); background-size: 220% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: kk-sheen 7s linear infinite;
+}
+.pricing__nop b { color: var(--fg-strong); }
+.pricing__pi { justify-self: end; margin-top: 4px; }
+.pricing__ctas { margin-top: auto; display: grid; gap: 10px; }
+.pricing__ctas .pricing__cta { margin-top: 0; }
 
 .pricing__table { margin-top: 28px; overflow-x: auto; border-radius: var(--r-lg); border: 1px solid var(--border); }
 .pricing__table table { width: 100%; border-collapse: collapse; min-width: 560px; }

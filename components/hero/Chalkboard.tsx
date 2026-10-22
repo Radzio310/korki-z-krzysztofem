@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import "./board.css";
 
 /* Tablica: kroki rozwiązania pisane kredą (sterowane z zewnątrz zmienną `--w` każdej linii),
    wykres paraboli rysowany kreską i płótno, po którym gość może pisać sam.

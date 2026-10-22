@@ -26,7 +26,7 @@ export default function Pricing({ offer }: { offer: Offer }) {
   const [flash, setFlash] = React.useState(false);
 
   useHandoff((h) => {
-    if (h.source === "pricing") return;
+    if (h.source === "pricing" || h.target === "contact") return;
     if (h.level_key && levels.some((l) => l.key === h.level_key)) setLevelKey(h.level_key);
     if (h.duration && durations.includes(h.duration)) setDuration(h.duration);
     setFlash(true);
@@ -38,6 +38,11 @@ export default function Pricing({ offer }: { offer: Offer }) {
   const weeklyMin = duration * weekly;
   const nextDiscount = [...offer.discounts].sort((a, b) => a.min_weekly_minutes - b.min_weekly_minutes).find((d) => d.min_weekly_minutes > weeklyMin);
 
+  const askPrice = () => {
+    emitHandoff({ target: "contact", subject_key: "matematyka", level_key: levelKey, source: "pricing" });
+    scrollToTarget("#kontakt");
+  };
+
   const book = () => {
     emitHandoff({ level_key: levelKey, duration, weekly, source: "pricing" });
     scrollToTarget("#rezerwacja");
@@ -47,9 +52,13 @@ export default function Pricing({ offer }: { offer: Offer }) {
     <section id="cennik" ref={root} className="section pricing">
       <div className="wrap">
         <div className="pricing__head">
-          <span className="eyebrow" data-reveal>Cennik i kalkulator</span>
-          <h2 className="h-section" data-reveal>Policz swój <span className="text-sea">pakiet</span></h2>
-          <p className="lead" data-reveal>Wybierz poziom, długość lekcji i liczbę spotkań w tygodniu — cena przelicza się na żywo.</p>
+          <span className="eyebrow" data-reveal>{priced ? "Cennik i kalkulator" : "Plan zajęć"}</span>
+          <h2 className="h-section" data-reveal>{priced ? <>Policz swój <span className="text-sea">pakiet</span></> : <>Ułóż swój <span className="text-sea">plan</span></>}</h2>
+          <p className="lead" data-reveal>
+            {priced
+              ? "Wybierz poziom, długość lekcji i liczbę spotkań w tygodniu — cena przelicza się na żywo."
+              : "Wybierz poziom, długość lekcji i liczbę spotkań w tygodniu. Cenę ustalamy indywidualnie — zapytaj o nią jednym kliknięciem."}
+          </p>
         </div>
 
         <div className={`pricing__calc card ${flash ? "is-flash" : ""}`} data-reveal>
@@ -133,13 +142,28 @@ export default function Pricing({ offer }: { offer: Offer }) {
               </>
             ) : (
               <div className="pricing__nop">
-                <Mascot mood="think" size={104} say="Tę wycenę policzymy razem — napisz albo zarezerwuj termin." side="left" />
-                <p className="muted">Cena zależy od poziomu i celu — ustalimy ją przy pierwszym kontakcie.</p>
+                <span className="pricing__label">Cena</span>
+                <p className="pricing__indiv">ustalana<br />indywidualnie</p>
+                <p className="muted">
+                  {level ? <>Wybrany plan: <b>{level.name}</b>, {weekly} × {duration} min tygodniowo.</> : <>Wybrany plan: {weekly} × {duration} min tygodniowo.</>}
+                </p>
+                <Mascot className="pricing__pi" mood="think" size={88} say="Zapytaj o cenę tego planu — to jedno kliknięcie." side="left" />
               </div>
             )}
-            <button type="button" className="btn btn--primary pricing__cta" onClick={book} onPointerDown={ripple}>
-              Zarezerwuj ten wariant
-            </button>
+            {q && priced ? (
+              <button type="button" className="btn btn--primary pricing__cta" onClick={book} onPointerDown={ripple}>
+                Zarezerwuj ten wariant
+              </button>
+            ) : (
+              <div className="pricing__ctas">
+                <button type="button" className="btn btn--primary pricing__cta" onClick={askPrice} onPointerDown={ripple}>
+                  Zapytaj o cenę
+                </button>
+                <button type="button" className="btn pricing__cta" onClick={book} onPointerDown={ripple}>
+                  Zarezerwuj termin
+                </button>
+              </div>
+            )}
           </div>
         </div>
 

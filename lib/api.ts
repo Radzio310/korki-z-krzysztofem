@@ -1,14 +1,17 @@
 import type {
-  Booking, DailyTask, List, QuizQuestion, QuizResult, Review, Site, Slots, TaskCheck,
+  Booking, ContactRequest, ContactResponse, DailyTask, List, QuizQuestion, QuizResult, Review, Site, Slots, TaskCheck,
 } from "./types";
 
 export const API_BASE = (process.env.NEXT_PUBLIC_KORKI_API || "https://communioserwer-production.up.railway.app").replace(/\/$/, "");
 
 export class ApiError extends Error {
   status: number;
-  constructor(status: number, message: string) {
+  /** Pola odrzucone przez serwer (400/422): nazwy z `errors[].loc` albo z listy `detail`. */
+  fields: string[];
+  constructor(status: number, message: string, fields: string[] = []) {
     super(message);
     this.status = status;
+    this.fields = fields;
   }
 }
 
@@ -22,6 +25,21 @@ const FALLBACK: Record<number, string> = {
 };
 
 type Opts = { method?: string; body?: unknown; token?: string | null; signal?: AbortSignal };
+
+/* Nazwy pól z odpowiedzi 400/422: `{ errors: [{ loc: ["body", "phone"] }] }` albo lista `detail` FastAPI. */
+function badFields(data: unknown, detail: unknown): string[] {
+  const out = new Set<string>();
+  const lists = [(data as { errors?: unknown } | null)?.errors, detail];
+  for (const l of lists) {
+    if (!Array.isArray(l)) continue;
+    for (const e of l as { loc?: unknown }[]) {
+      const loc = Array.isArray(e?.loc) ? e.loc : [];
+      const f = loc.filter((x) => x !== "body" && typeof x === "string")[0];
+      if (typeof f === "string") out.add(f);
+    }
+  }
+  return [...out];
+}
 
 export async function api<T>(path: string, opts: Opts = {}): Promise<T> {
   const headers: Record<string, string> = { accept: "application/json" };
@@ -57,7 +75,7 @@ export async function api<T>(path: string, opts: Opts = {}): Promise<T> {
       if (/email/i.test(msg)) msg = "Podaj poprawny adres e-mail.";
       else if (/^(Field required|String should|Input should|value is not|List should)/i.test(msg)) msg = FALLBACK[400];
     }
-    throw new ApiError(res.status, msg);
+    throw new ApiError(res.status, msg, badFields(data, detail));
   }
   return data as T;
 }
@@ -90,5 +108,5 @@ export const publicApi = {
   quiz: () => api<List<QuizQuestion>>("/korki/public/quiz"),
   score: (answers: { id: number; choice: number }[], seconds: number) =>
     api<QuizResult>("/korki/public/quiz/score", { body: { answers, seconds } }),
-  contact: (body: Record<string, unknown>) => api<unknown>("/korki/public/contact", { body }),
+  contact: (body: ContactRequest, signal?: AbortSignal) => api<ContactResponse>("/korki/public/contact", { body, signal }),
 };

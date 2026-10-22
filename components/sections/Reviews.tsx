@@ -4,10 +4,33 @@ import React from "react";
 import Mascot from "../Mascot";
 import Sheet from "../ui/Sheet";
 import Stars from "../ui/Stars";
+import KineticTitle from "../hero/KineticTitle";
 import type { Review } from "@/lib/types";
 import { publicApi } from "@/lib/api";
+import { FALLBACK_REVIEWS, REVIEWS_HEAD, type FallbackReview } from "@/content/reviews";
 import { ensureGsap, reducedMotion, ripple, useReveal } from "@/lib/motion";
 import "./reviews.css";
+
+type Card = {
+  key: string;
+  author: string;
+  context: string;
+  quote: string;
+  rating?: number | null;
+  original?: FallbackReview;
+};
+
+const FEATURED = ["julia", "amelia", "rodzic"];
+
+function fromFallback(): Card[] {
+  const first = FEATURED.map((id) => FALLBACK_REVIEWS.find((r) => r.id === id)!).filter(Boolean);
+  const rest = FALLBACK_REVIEWS.filter((r) => !FEATURED.includes(r.id));
+  return [...first, ...rest].map((r) => ({ key: r.id, author: r.author, context: r.context, quote: r.quote, original: r }));
+}
+function fromApi(rows: Review[]): Card[] {
+  const sorted = [...rows].sort((a, b) => Number(b.featured) - Number(a.featured));
+  return sorted.map((r) => ({ key: String(r.id), author: r.author_name, context: r.author_label || "", quote: r.body, rating: r.rating }));
+}
 
 function ReviewForm({ onDone }: { onDone: () => void }) {
   const [rating, setRating] = React.useState(5);
@@ -67,12 +90,40 @@ function ReviewForm({ onDone }: { onDone: () => void }) {
   );
 }
 
+function QuoteCard({ c, i, onOriginal }: { c: Card; i: number; onOriginal: (r: FallbackReview) => void }) {
+  return (
+    <article className="rvc" style={{ "--i": i } as React.CSSProperties}>
+      <svg className="rvc__q" viewBox="0 0 48 40" aria-hidden="true">
+        <path d="M4 38V22C4 11 10 4 20 2l2 5c-6 2-9 6-9 12h8v19zm24 0V22c0-11 6-18 16-20l2 5c-6 2-9 6-9 12h8v19z" />
+      </svg>
+      {c.rating ? <Stars value={c.rating} size={17} /> : null}
+      <blockquote>{c.quote}</blockquote>
+      <footer className="rvc__who">
+        <span className="rvc__avatar" aria-hidden="true">{c.author.slice(0, 1).toUpperCase()}</span>
+        <span><b>{c.author}</b>{c.context ? <small>{c.context}</small> : null}</span>
+      </footer>
+      {c.original ? (
+        <button type="button" className="rvc__orig" onClick={() => onOriginal(c.original!)}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={c.original.image} alt="" width={1024} height={576} loading="lazy" decoding="async" />
+          <span>{REVIEWS_HEAD.original}<span className="sr-only">: opinia — {c.author}</span></span>
+        </button>
+      ) : null}
+    </article>
+  );
+}
+
+/* Opinie: trzy karty na wierzchu, reszta w natywnym <details> (działa bez JS).
+   Bez opinii z API pokazujemy dziewięć prawdziwych opinii ze starej strony — klik w kartę
+   otwiera oryginalną grafikę jako dowód. Karty lekko przechylają się do kursora. */
 export default function Reviews({ summary }: { summary: { count: number; average: number | null } }) {
   const root = useReveal<HTMLElement>();
-  const rail = React.useRef<HTMLDivElement>(null);
   const [rows, setRows] = React.useState<Review[] | null>(null);
   const [open, setOpen] = React.useState(false);
-  const [expanded, setExpanded] = React.useState<number | null>(null);
+  const [orig, setOrig] = React.useState<FallbackReview | null>(null);
+  const [origOpen, setOrigOpen] = React.useState(false);
+  const showOrig = React.useCallback((r: FallbackReview) => { setOrig(r); setOrigOpen(true); }, []);
+  const [more, setMore] = React.useState(false);
 
   React.useEffect(() => {
     const el = root.current;
@@ -81,126 +132,98 @@ export default function Reviews({ summary }: { summary: { count: number; average
       if (!e.isIntersecting) return;
       io.disconnect();
       publicApi.reviews(30).then((r) => setRows(r.rows)).catch(() => setRows([]));
-    }, { rootMargin: "500px 0px" });
+    }, { rootMargin: "600px 0px" });
     io.observe(el);
     return () => io.disconnect();
   }, [root]);
 
-  /* Przeciąganie taśmy z bezwładnością; karty lekko się przechylają w ruchu. */
+  /* Po zmianie wysokości (opinie z API, rozwinięcie) przeliczamy sceny przypięte niżej. */
   React.useEffect(() => {
-    const el = rail.current;
-    if (!el || !rows?.length) return;
-    const { gsap } = ensureGsap();
-    let down = false, startX = 0, startScroll = 0, lastX = 0, v = 0, raf = 0, moved = false;
-    const tiltTo = gsap.quickTo(el, "--tilt", { duration: 0.5, ease: "power3" });
-    const onDown = (e: PointerEvent) => {
-      if (e.pointerType !== "mouse") return;
-      down = true; moved = false; startX = lastX = e.clientX; startScroll = el.scrollLeft; v = 0;
-      cancelAnimationFrame(raf);
-      el.classList.add("is-drag");
-    };
-    const onMove = (e: PointerEvent) => {
-      if (!down) return;
-      const dx = e.clientX - startX;
-      if (Math.abs(dx) > 4) moved = true;
-      v = e.clientX - lastX; lastX = e.clientX;
-      el.scrollLeft = startScroll - dx;
-      if (!reducedMotion()) tiltTo(Math.max(-6, Math.min(6, v * 0.5)));
-    };
-    const onUp = () => {
-      if (!down) return;
-      down = false;
-      el.classList.remove("is-drag");
-      tiltTo(0);
-      const glide = () => {
-        v *= 0.94;
-        el.scrollLeft -= v;
-        if (Math.abs(v) > 0.4) raf = requestAnimationFrame(glide);
-      };
-      if (!reducedMotion()) glide();
-    };
-    const onClick = (e: MouseEvent) => { if (moved) { e.stopPropagation(); e.preventDefault(); } };
-    el.addEventListener("pointerdown", onDown);
-    window.addEventListener("pointermove", onMove);
-    window.addEventListener("pointerup", onUp);
-    el.addEventListener("click", onClick, true);
-    return () => {
-      cancelAnimationFrame(raf);
-      el.removeEventListener("pointerdown", onDown);
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
-      el.removeEventListener("click", onClick, true);
-    };
-  }, [rows]);
+    const { ScrollTrigger } = ensureGsap();
+    const t = window.setTimeout(() => ScrollTrigger.refresh(), 60);
+    return () => window.clearTimeout(t);
+  }, [rows, more]);
 
-  const nudge = (dir: number) => {
-    const el = rail.current;
-    if (!el) return;
-    el.scrollBy({ left: dir * Math.min(460, el.clientWidth * 0.8), behavior: reducedMotion() ? "auto" : "smooth" });
-  };
+  /* Przechył karty do kursora — tylko precyzyjny wskaźnik. */
+  React.useEffect(() => {
+    const el = root.current;
+    if (!el || reducedMotion() || !matchMedia("(pointer: fine)").matches) return;
+    const move = (e: PointerEvent) => {
+      const card = (e.target as HTMLElement).closest<HTMLElement>(".rvc");
+      if (!card) return;
+      const r = card.getBoundingClientRect();
+      card.style.setProperty("--rx", `${(((e.clientY - r.top) / r.height) - 0.5) * -6}deg`);
+      card.style.setProperty("--ry", `${(((e.clientX - r.left) / r.width) - 0.5) * 8}deg`);
+    };
+    const out = (e: PointerEvent) => {
+      const card = (e.target as HTMLElement).closest<HTMLElement>(".rvc");
+      if (card && !card.contains(e.relatedTarget as Node)) { card.style.setProperty("--rx", "0deg"); card.style.setProperty("--ry", "0deg"); }
+    };
+    el.addEventListener("pointermove", move);
+    el.addEventListener("pointerout", out);
+    return () => { el.removeEventListener("pointermove", move); el.removeEventListener("pointerout", out); };
+  }, [root]);
 
+  const cards = rows && rows.length ? fromApi(rows) : fromFallback();
+  const top = cards.slice(0, 3);
+  const rest = cards.slice(3);
   const avg = summary.average;
-  return (
-    <section id="opinie" ref={root} className="section reviews">
-      <div className="wrap reviews__head">
-        <div>
-          <span className="eyebrow" data-reveal>Opinie</span>
-          <h2 className="h-section" data-reveal>Co mówią <span className="text-sea">uczniowie</span></h2>
-        </div>
-        <div className="reviews__score" data-reveal>
-          {summary.count > 0 && avg != null ? (
-            <>
-              <strong>{avg.toFixed(1).replace(".", ",")}</strong>
-              <div>
-                <Stars value={avg} size={20} />
-                <span className="muted">{summary.count} {summary.count === 1 ? "opinia" : summary.count % 10 >= 2 && summary.count % 10 <= 4 && (summary.count % 100 < 10 || summary.count % 100 >= 20) ? "opinie" : "opinii"}</span>
-              </div>
-            </>
-          ) : null}
-          <button type="button" className="btn btn--sm" onClick={() => setOpen(true)} onPointerDown={ripple}>+ Dodaj opinię</button>
-        </div>
-      </div>
 
-      {rows === null ? (
-        <div className="wrap reviews__loading"><span /><span /><span /></div>
-      ) : rows.length === 0 ? (
-        <div className="wrap">
-          <div className="reviews__empty card">
-            <Mascot mood="wave" size={120} say="Tu zawisną pierwsze opinie — może Twoja?" side="left" />
-            <button type="button" className="btn btn--primary" onClick={() => setOpen(true)} onPointerDown={ripple}>Napisz opinię</button>
+  return (
+    <section id="opinie" ref={root} className="section rvs">
+      <span id="opinie_mobile" className="rvs__alias" aria-hidden="true" />
+      <div className="wrap">
+        <div className="rvs__head">
+          <div className="rvs__titles">
+            <span className="eyebrow" data-reveal>{REVIEWS_HEAD.eyebrow}</span>
+            <KineticTitle as="h2" reveal="view" text={REVIEWS_HEAD.title} accentFrom={5} className="h-section" />
+          </div>
+          <div className="rvs__score" data-reveal>
+            {summary.count > 0 && avg != null ? (
+              <>
+                <strong>{avg.toFixed(1).replace(".", ",")}</strong>
+                <div>
+                  <Stars value={avg} size={20} />
+                  <span className="muted">{summary.count} {summary.count === 1 ? "opinia" : summary.count % 10 >= 2 && summary.count % 10 <= 4 && (summary.count % 100 < 10 || summary.count % 100 >= 20) ? "opinie" : "opinii"}</span>
+                </div>
+              </>
+            ) : null}
+            <button type="button" className="btn btn--sm" onClick={() => setOpen(true)} onPointerDown={ripple}>+ Dodaj opinię</button>
           </div>
         </div>
-      ) : (
-        <>
-          <div ref={rail} className="reviews__rail" tabIndex={0} aria-label="Opinie — przewiń w bok">
-            {rows.map((r, i) => {
-              const long = r.body.length > 260;
-              const isOpen = expanded === r.id;
-              return (
-                <figure key={r.id} className={`rv ${r.featured ? "rv--featured" : ""}`} style={{ "--i": i } as React.CSSProperties}>
-                  <span className="rv__quote" aria-hidden="true">“</span>
-                  {r.rating ? <Stars value={r.rating} size={18} /> : null}
-                  <blockquote className={long && !isOpen ? "is-clamped" : ""}>{r.body}</blockquote>
-                  {long ? (
-                    <button type="button" className="rv__more" onClick={() => setExpanded(isOpen ? null : r.id)}>{isOpen ? "Zwiń" : "Czytaj całość"}</button>
-                  ) : null}
-                  <figcaption>
-                    <span className="rv__avatar" aria-hidden="true">{r.author_name.slice(0, 1).toUpperCase()}</span>
-                    <span><b>{r.author_name}</b>{r.author_label ? <small>{r.author_label}</small> : null}</span>
-                  </figcaption>
-                </figure>
-              );
-            })}
-          </div>
-          <div className="wrap reviews__nav">
-            <button type="button" className="reviews__arrow" onClick={() => nudge(-1)} aria-label="Poprzednie opinie">←</button>
-            <button type="button" className="reviews__arrow" onClick={() => nudge(1)} aria-label="Następne opinie">→</button>
-          </div>
-        </>
-      )}
+
+        <div className={`rvs__grid ${rows && rows.length ? "is-api" : ""}`}>
+          {top.map((c, i) => <QuoteCard key={c.key} c={c} i={i} onOriginal={showOrig} />)}
+        </div>
+
+        {rest.length ? (
+          <details className="rvs__more" onToggle={(e) => setMore((e.currentTarget as HTMLDetailsElement).open)}>
+            <summary className="btn">
+              <span>{more ? REVIEWS_HEAD.less : cards.length === 9 ? REVIEWS_HEAD.more : `Zobacz wszystkie ${cards.length} opinii`}</span>
+              <i aria-hidden="true" />
+            </summary>
+            <div className="rvs__grid rvs__grid--rest">
+              {rest.map((c, i) => <QuoteCard key={c.key} c={c} i={i} onOriginal={showOrig} />)}
+            </div>
+          </details>
+        ) : null}
+      </div>
 
       <Sheet open={open} onClose={() => setOpen(false)} title="Twoja opinia">
         <ReviewForm onDone={() => setOpen(false)} />
+      </Sheet>
+
+      <Sheet open={origOpen} onClose={() => setOrigOpen(false)} title={orig ? `Opinia — ${orig.author}` : "Opinia"} wide>
+        {orig ? (
+          <figure className="rv-orig">
+            <picture>
+              <source media="(max-width: 640px)" srcSet={orig.imageTall} />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={orig.image} alt={`Oryginalna grafika z opinią: „${orig.quote}” — ${orig.author}${orig.context ? `, ${orig.context}` : ""}`} width={1024} height={576} />
+            </picture>
+            <figcaption className="muted">Grafika z dotychczasowej strony — tekst na karcie jest jej wierną transkrypcją.</figcaption>
+          </figure>
+        ) : null}
       </Sheet>
     </section>
   );

@@ -21,15 +21,16 @@
   backdrop-filter: blur(20px) saturate(1.4);
 }
 .nav__brand { display: flex; align-items: center; gap: 12px; flex: none; }
-.nav__ring { position: relative; width: 44px; height: 44px; display: grid; place-items: center; }
+.nav__ring { position: relative; width: 48px; height: 48px; display: grid; place-items: center; }
+.nav__logo { width: 34px; height: 34px; object-fit: contain; transition: transform var(--dur-3) var(--ease-spring); }
 .nav__ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
 .nav__ring circle { fill: none; stroke-width: 2.4; }
 .nav__ring-bg { stroke: var(--border); }
 .nav__ring-fg { stroke: var(--accent); stroke-dasharray: 100; stroke-dashoffset: 100; stroke-linecap: round; transition: stroke-dashoffset 120ms linear; }
-.nav__brand:hover .logo { transform: rotate(-8deg) scale(1.08); }
-.logo { transition: transform var(--dur-3) var(--ease-spring); }
+.nav__brand:hover .nav__logo { transform: rotate(-8deg) scale(1.08); }
 .nav__word { font: 700 17px/1 var(--font-display); letter-spacing: -.02em; color: var(--fg-strong); white-space: nowrap; }
 .nav__word em { font-family: var(--font-chalk); font-style: normal; font-size: 22px; color: var(--accent); padding: 0 1px; }
+.nav__cta { min-height: 44px; }
 
 .nav__links { position: relative; margin: 0 auto; }
 .nav__links ul { display: flex; gap: 2px; list-style: none; margin: 0; padding: 0; }
@@ -100,8 +101,16 @@
 }
 .sheet__nav a small { font: 600 13px/1 var(--font-mono); color: var(--accent); }
 .sheet.is-open .sheet__nav a { opacity: 1; transform: none; transition-delay: calc(200ms + var(--i) * 45ms); }
+.sheet__cta {
+  display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px;
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 500ms var(--ease-out), transform 700ms var(--ease-spring);
+}
+.sheet.is-open .sheet__cta { opacity: 1; transform: none; transition-delay: calc(200ms + var(--i) * 45ms); }
+.sheet__nav .sheet__cta a { opacity: 1; transform: none; font: 700 16px/1 var(--font-body); letter-spacing: 0; display: inline-flex; }
+.nav--open .nav__bar { background: transparent; border-color: transparent; box-shadow: none; backdrop-filter: none; }
 
-@media (max-width: 1080px) {
+@media (max-width: 1120px) {
   .nav__links { display: none; }
   .nav__burger { display: block; }
   .nav__actions { margin-left: auto; }

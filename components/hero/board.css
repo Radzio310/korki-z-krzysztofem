@@ -1,0 +1,125 @@
+/* Tablica (Chalkboard): kreda na granatowej, marker na białej — kolory z tokenów --board-*. */
+/* ── tablica ─────────────────────────────────────────────────────────────── */
+.hero__boardwrap { position: relative; perspective: 1400px; }
+.board { position: relative; transform-style: preserve-3d; will-change: transform; }
+.board__frame {
+  position: relative;
+  padding: 14px 14px 0;
+  border-radius: 22px;
+  background: linear-gradient(135deg, var(--board-edge-hi), var(--board-edge) 40%, var(--board-edge-hi) 70%, var(--board-edge));
+  box-shadow: var(--shadow-2), inset 0 1px 0 var(--board-light);
+}
+.board__surface {
+  position: relative;
+  aspect-ratio: 16 / 11;
+  border-radius: 12px;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 80% at 30% 20%, var(--board-light), transparent 60%),
+    radial-gradient(80% 60% at 80% 90%, var(--board-shade), transparent 70%),
+    var(--board);
+  box-shadow: inset 0 0 60px var(--board-shade);
+  touch-action: none;
+}
+:root[data-theme="light"] .board__surface { box-shadow: inset 0 0 0 1px var(--border), inset 0 0 40px var(--board-shade); }
+/* smugi po wycieraniu — tylko na kredowej */
+.board__surface::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  opacity: calc(var(--board-grain) * .5);
+  background:
+    linear-gradient(100deg, transparent 10%, var(--board-light) 18%, transparent 30%),
+    linear-gradient(80deg, transparent 50%, var(--board-light) 60%, transparent 72%);
+}
+.board__defs { position: absolute; width: 0; height: 0; }
+
+.board__lines {
+  position: absolute; inset: 7% 6% auto 6%;
+  display: grid; gap: clamp(2px, .6vw, 8px);
+  width: 62%;
+  pointer-events: none;
+}
+.board__line {
+  --w: 0;
+  position: relative; width: max-content; max-width: 100%;
+  font: 600 clamp(19px, 2.3vw, 34px)/1.25 var(--font-chalk);
+  color: var(--board-ink);
+}
+.board__ink {
+  display: block; white-space: nowrap;
+  clip-path: inset(-10% calc((1 - var(--w)) * 100%) -20% 0);
+  filter: url(#chalk-rough);
+  text-shadow: 0 0 1px currentColor;
+}
+:root[data-theme="light"] .board__ink { filter: none; text-shadow: none; }
+.board__line--task { color: var(--board-mark); }
+.board__line--answer { margin-top: 4px; color: var(--board-accent); font-weight: 700; }
+.board__tip {
+  position: absolute; top: 50%; left: calc(var(--w) * 100%);
+  width: 14px; height: 6px; border-radius: 3px;
+  background: var(--board-ink);
+  transform: translate(-30%, 40%) rotate(-24deg);
+  opacity: calc(min(var(--w) * 40, 1) * min((1 - var(--w)) * 40, 1));
+  box-shadow: 0 0 10px var(--board-ink-soft);
+}
+.board__circle { position: absolute; inset: -18% -8% -22% -6%; width: 116%; height: 140%; overflow: visible; }
+.board__circle path { fill: none; stroke: var(--board-accent); stroke-width: 2.6; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; filter: url(#chalk-rough); }
+
+.board__graph { position: absolute; right: 4%; bottom: 8%; width: 38%; overflow: visible; pointer-events: none; }
+.board__axis, .board__parab { fill: none; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
+.board__axis { stroke: var(--board-ink-soft); stroke-width: 1.6; }
+.board__parab { stroke: var(--board-mark); stroke-width: 3; filter: url(#chalk-rough); }
+.board__root { fill: var(--board-accent); opacity: 0; }
+.board.is-solved .board__root { animation: board-ping 1.6s ease-out infinite; }
+.board__lbl { font: 600 15px var(--font-chalk); fill: var(--board-ink-soft); }
+@keyframes board-ping { 0% { filter: drop-shadow(0 0 0 var(--board-accent)); } 50% { filter: drop-shadow(0 0 8px var(--board-accent)); } 100% { filter: drop-shadow(0 0 0 transparent); } }
+
+.board__canvas { position: absolute; inset: 0; z-index: 2; cursor: crosshair; transition: opacity 500ms var(--ease-out), filter 500ms; }
+.board__canvas.tool-sponge { cursor: cell; }
+.board__canvas.is-wiping { opacity: 0; filter: blur(6px); }
+.board__hint {
+  position: absolute; right: 5%; top: 6%; z-index: 3; pointer-events: none;
+  font-size: 22px; font-weight: 700; color: var(--board-ink-soft);
+  animation: kk-pulse 2.4s ease-in-out infinite;
+  rotate: 6deg;
+}
+
+.board__tray {
+  display: flex; align-items: center; gap: 6px;
+  height: 46px; padding: 0 10px;
+}
+.board__tool {
+  height: 32px; padding: 0 10px; border-radius: 10px;
+  display: grid; place-items: center;
+  transition: transform var(--dur-2) var(--ease-spring), background var(--dur-2);
+}
+.board__tool:hover { transform: translateY(-2px); }
+.board__tool[aria-pressed="true"] { background: var(--input-bg); box-shadow: inset 0 0 0 1px var(--border-strong); transform: translateY(-3px); }
+.board__stick { display: block; width: 34px; height: 9px; border-radius: 4px; box-shadow: var(--shadow-1); }
+.board__stick--white { background: var(--stick-a); }
+.board__stick--gold { background: var(--stick-b); }
+.board__sponge { display: block; width: 30px; height: 16px; border-radius: 5px; background: linear-gradient(180deg, var(--sun-400) 0 55%, var(--ocean-800) 55%); box-shadow: var(--shadow-1); }
+.board__clear {
+  margin-left: auto; padding: 6px 12px; border-radius: 10px;
+  font: 700 12.5px/1 var(--font-body); letter-spacing: .02em;
+  color: var(--board-ink-soft);
+  transition: background var(--dur-2), opacity var(--dur-2);
+}
+.board__clear:hover { background: var(--input-bg); color: var(--board-ink); }
+.board__clear:disabled { opacity: .35; }
+
+
+/* bez JS tablica pokazuje gotowe rozwiązanie */
+@media (scripting: none) {
+  .board__line { --w: 1; }
+  .board__axis, .board__parab, .board__circle path { stroke-dashoffset: 0; }
+  .board__root { opacity: 1; }
+}
+
+@media (max-width: 899px) {
+  .board__lines { width: 92%; }
+  .board__graph { width: 34%; right: 3%; bottom: 4%; opacity: .9; }
+}
+@media (max-width: 520px) {
+  .board__clear { font-size: 11px; padding: 6px 8px; }
+  .board__surface { aspect-ratio: 4 / 3.3; }
+}

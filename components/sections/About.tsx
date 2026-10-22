@@ -2,19 +2,13 @@
 
 import React from "react";
 import type { Content } from "@/lib/types";
-import { ensureGsap, reducedMotion, useReveal } from "@/lib/motion";
+import KineticTitle from "../hero/KineticTitle";
+import Portrait from "../hero/Portrait";
+import { ABOUT } from "@/content/site";
+import { ensureGsap, reducedMotion, ripple, useReveal } from "@/lib/motion";
 import "./about.css";
 
-const DEFAULT_BODY =
-  "Tłumaczę tak długo, aż zaczniesz rozumieć — nie tylko zapamiętywać wzory. Każde spotkanie zaczynamy od tego, co Cię dziś blokuje, i kończymy zadaniem, które zrobisz już sam.";
-
-const VALUES = [
-  { k: "Spokój", v: "Bez oceniania i bez pośpiechu. Błąd to informacja, nie porażka." },
-  { k: "Zrozumienie", v: "Najpierw „dlaczego”, potem „jak”. Wzór staje się oczywisty." },
-  { k: "Plan", v: "Wiesz, co robimy na każdej lekcji i dokąd zmierzamy." },
-];
-
-/* Licznik, który dolicza do wartości po wejściu na ekran. Tekst, który nie jest liczbą, wpada bez liczenia. */
+/* Licznik, który dolicza do wartości po wejściu na ekran (tylko liczby z panelu). */
 function Counter({ value }: { value: string }) {
   const ref = React.useRef<HTMLSpanElement>(null);
   React.useEffect(() => {
@@ -30,10 +24,7 @@ function Counter({ value }: { value: string }) {
       io.disconnect();
       const { gsap } = ensureGsap();
       const o = { v: 0 };
-      gsap.to(o, {
-        v: target, duration: 1.8, ease: "power3.out",
-        onUpdate: () => { el.textContent = `${pre}${o.v.toFixed(dec).replace(".", ",")}${post}`; },
-      });
+      gsap.to(o, { v: target, duration: 1.8, ease: "power3.out", onUpdate: () => { el.textContent = `${pre}${o.v.toFixed(dec).replace(".", ",")}${post}`; } });
     }, { threshold: 0.6 });
     io.observe(el);
     return () => io.disconnect();
@@ -41,88 +32,79 @@ function Counter({ value }: { value: string }) {
   return <span ref={ref}>{value}</span>;
 }
 
+/* Tekst z {fragmentami} do podświetlenia markerem. */
+function Marked({ text, on }: { text: string; on: string | null }) {
+  const parts = text.split(/\{([^}]+)\}/);
+  return (
+    <>
+      {parts.map((p, i) => (i % 2 ? <mark key={i} className={`ab__mark ${on === p ? "is-on" : ""}`}>{p}</mark> : <React.Fragment key={i}>{p}</React.Fragment>))}
+    </>
+  );
+}
+
+/* O mnie: Krzysztof wynurza się z koła, gdy przewijasz (ten sam „bulaj” co w hero).
+   Cztery wartości to przyciski — każdy podkreśla markerem swój fragment tekstu. */
 export default function About({ content }: { content: Content }) {
   const root = useReveal<HTMLElement>();
-  const photo = React.useRef<HTMLDivElement>(null);
+  const [on, setOn] = React.useState<string | null>(null);
+  const title = content.about_title?.trim() || ABOUT.title;
+  const customBody = content.about_body?.trim();
 
-  /* Zdjęcie przechyla się za kursorem, a odblask idzie za nim po szkle. */
-  React.useEffect(() => {
-    const el = photo.current;
-    if (!el || reducedMotion() || !matchMedia("(pointer: fine)").matches) return;
-    const { gsap } = ensureGsap();
-    const rx = gsap.quickTo(el, "rotateX", { duration: 0.8, ease: "power3" });
-    const ry = gsap.quickTo(el, "rotateY", { duration: 0.8, ease: "power3" });
-    const move = (e: PointerEvent) => {
-      const r = el.getBoundingClientRect();
-      const x = (e.clientX - r.left) / r.width;
-      const y = (e.clientY - r.top) / r.height;
-      ry((x - 0.5) * 14);
-      rx((0.5 - y) * 12);
-      el.style.setProperty("--glow-x", `${x * 100}%`);
-      el.style.setProperty("--glow-y", `${y * 100}%`);
-    };
-    const leave = () => { rx(0); ry(0); };
-    el.addEventListener("pointermove", move);
-    el.addEventListener("pointerleave", leave);
-    return () => { el.removeEventListener("pointermove", move); el.removeEventListener("pointerleave", leave); };
-  }, []);
-
-  /* Parallax warstw w sekcji. */
+  /* Pierścień z napisem obraca się z przewijaniem. */
   React.useEffect(() => {
     const el = root.current;
     if (!el || reducedMotion()) return;
     const { gsap } = ensureGsap();
     const ctx = gsap.context(() => {
-      gsap.to(".about__ring", { rotate: 120, ease: "none", scrollTrigger: { trigger: el, start: "top bottom", end: "bottom top", scrub: true } });
-      gsap.fromTo(".about__photowrap", { yPercent: 8 }, { yPercent: -8, ease: "none", scrollTrigger: { trigger: el, start: "top bottom", end: "bottom top", scrub: true } });
+      gsap.to(".ab__ring", { rotate: 140, ease: "none", scrollTrigger: { trigger: el, start: "top bottom", end: "bottom top", scrub: true } });
     }, el);
     return () => ctx.revert();
   }, [root]);
 
-  const title = content.about_title?.trim() || "Cześć, jestem Krzysztof.";
-  const body = content.about_body?.trim() || DEFAULT_BODY;
-
   return (
-    <section id="o-mnie" ref={root} className="section about">
-      <div className="wrap about__grid">
-        <div className="about__photowrap" data-reveal>
-          <div className="about__ring" aria-hidden="true">
+    <section id="o-mnie" ref={root} className="section ab">
+      <div className="wrap ab__grid">
+        <div className="ab__visual">
+          <div className="ab__ring" aria-hidden="true">
             <svg viewBox="0 0 200 200">
-              <defs><path id="about-circle" d="M100 100 m -86 0 a 86 86 0 1 1 172 0 a 86 86 0 1 1 -172 0" /></defs>
-              <text><textPath href="#about-circle">korki z krzysztofem · krok po kroku · bez stresu · </textPath></text>
+              <defs><path id="ab-circle" d="M100 100 m -92 0 a 92 92 0 1 1 184 0 a 92 92 0 1 1 -184 0" /></defs>
+              <text><textPath href="#ab-circle">matematyka · chemia · krok po kroku · Mysłowice i online · </textPath></text>
             </svg>
           </div>
-          <div ref={photo} className="about__photo">
-            {content.photo_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={content.photo_url} alt="Krzysztof" loading="lazy" />
-            ) : (
-              <div className="about__mono" aria-hidden="true">
-                <svg viewBox="0 0 200 240">
-                  <defs>
-                    <clipPath id="about-k"><text x="100" y="190" textAnchor="middle">K</text></clipPath>
-                  </defs>
-                  <g clipPath="url(#about-k)">
-                    <rect width="200" height="240" className="about__mono-bg" />
-                    <path className="about__wave about__wave--1" d="M0 120 Q 25 105 50 120 T 100 120 T 150 120 T 200 120 T 250 120 T 300 120 T 350 120 T 400 120 V 240 H 0 Z" />
-                    <path className="about__wave about__wave--2" d="M0 132 Q 25 118 50 132 T 100 132 T 150 132 T 200 132 T 250 132 T 300 132 T 350 132 T 400 132 V 240 H 0 Z" />
-                  </g>
-                </svg>
-              </div>
-            )}
-            <span className="about__glare" aria-hidden="true" />
-          </div>
+          <Portrait mode="about" src={content.photo_url} alt={ABOUT.photoAlt} />
+          <p className="ab__sign chalk" aria-hidden="true">{ABOUT.signature}</p>
         </div>
 
-        <div className="about__copy">
-          <span className="eyebrow" data-reveal>O mnie</span>
-          <h2 className="h-section" data-reveal style={{ "--d": "80ms" } as React.CSSProperties}>{title}</h2>
-          <p className="lead" data-reveal style={{ "--d": "160ms" } as React.CSSProperties}>{body}</p>
+        <div className="ab__copy">
+          <span className="eyebrow" data-reveal>{ABOUT.eyebrow}</span>
+          <KineticTitle as="h2" reveal="view" text={title} accentFrom={content.about_title?.trim() ? undefined : 2} className="h-section" />
+          <p className="lead ab__body" data-reveal style={{ "--d": "120ms" } as React.CSSProperties}>
+            {customBody ? customBody : <Marked text={ABOUT.body} on={on} />}
+          </p>
+
+          {!customBody ? (
+            <ul className="ab__values" aria-label="Jak uczę" data-reveal style={{ "--d": "220ms" } as React.CSSProperties}>
+              {ABOUT.values.map((v) => (
+                <li key={v.k}>
+                  <button
+                    type="button"
+                    aria-pressed={on === v.k}
+                    onClick={() => setOn((c) => (c === v.k ? null : v.k))}
+                    onPointerEnter={(e) => { if (e.pointerType === "mouse") setOn(v.k); }}
+                    onPointerLeave={(e) => { if (e.pointerType === "mouse") setOn(null); }}
+                  >
+                    <b>{v.label}</b>
+                    <small>{v.hint}</small>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : null}
 
           {content.about_facts?.length ? (
-            <dl className="about__facts" data-reveal style={{ "--d": "240ms" } as React.CSSProperties}>
+            <dl className="ab__facts" data-reveal>
               {content.about_facts.slice(0, 4).map((f, i) => (
-                <div key={i} className="about__fact">
+                <div key={i} className="ab__fact">
                   <dt><Counter value={f.value} /></dt>
                   <dd>{f.label}</dd>
                 </div>
@@ -130,14 +112,10 @@ export default function About({ content }: { content: Content }) {
             </dl>
           ) : null}
 
-          <ul className="about__values">
-            {VALUES.map((v, i) => (
-              <li key={v.k} data-reveal style={{ "--d": `${300 + i * 90}ms` } as React.CSSProperties}>
-                <strong>{v.k}</strong>
-                <span>{v.v}</span>
-              </li>
-            ))}
-          </ul>
+          <div className="ab__cta" data-reveal style={{ "--d": "300ms" } as React.CSSProperties}>
+            <a href="#kontakt" className="btn btn--primary" onPointerDown={ripple}>{ABOUT.ctaContact}</a>
+            <a href="#opinie" className="btn" onPointerDown={ripple}>{ABOUT.ctaReviews}</a>
+          </div>
         </div>
       </div>
     </section>

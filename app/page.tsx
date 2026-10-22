@@ -7,18 +7,35 @@ export const revalidate = 60;
 
 export default async function Page() {
   const site = await fetchSite();
+  const site_url = (process.env.NEXT_PUBLIC_SITE_URL || "https://korkizkrzysztofem.pl").replace(/\/$/, "");
+  const email = site?.content?.contact?.email;
+  /* Tylko potwierdzone dane: osoba, usługa, telefon, profile, miasto. Bez adresu, godzin i ocen (AggregateRating). */
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "EducationalOrganization",
-    name: "Korki z Krzysztofem",
-    url: process.env.NEXT_PUBLIC_SITE_URL || "https://korkizkrzysztofem.pl",
-    description: "Korepetycje — rezerwacja terminów online, quiz poziomu i kalkulator ceny.",
-    ...(site?.content?.contact?.email ? { email: site.content.contact.email } : {}),
-    ...(site?.content?.contact?.phone ? { telephone: site.content.contact.phone } : {}),
-    ...(site?.content?.contact?.city ? { address: { "@type": "PostalAddress", addressLocality: site.content.contact.city, addressCountry: "PL" } } : {}),
-    ...(site && site.reviews_summary.count > 0 && site.reviews_summary.average
-      ? { aggregateRating: { "@type": "AggregateRating", ratingValue: site.reviews_summary.average.toFixed(1), reviewCount: site.reviews_summary.count } }
-      : {}),
+    "@graph": [
+      {
+        "@type": "Person",
+        "@id": `${site_url}/#krzysztof`,
+        name: "Krzysztof Witkowicz",
+        jobTitle: "Korepetytor",
+        url: `${site_url}/`,
+        telephone: "+48882418481",
+        ...(email ? { email } : {}),
+        knowsAbout: ["matematyka", "chemia"],
+        sameAs: ["https://www.facebook.com/krzysztof.witkowicz", "https://www.instagram.com/windknowsmyname/"],
+      },
+      {
+        "@type": "Service",
+        "@id": `${site_url}/#korepetycje`,
+        name: "Korki z Krzysztofem",
+        serviceType: "Korepetycje z matematyki i chemii",
+        description: "Korepetycje z matematyki i chemii w Mysłowicach i online, dopasowane do poziomu ucznia.",
+        url: `${site_url}/`,
+        telephone: "+48882418481",
+        provider: { "@id": `${site_url}/#krzysztof` },
+        areaServed: [{ "@type": "City", name: "Mysłowice" }],
+      },
+    ],
   };
   return (
     <>

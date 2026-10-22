@@ -99,7 +99,11 @@ export function useMagnet<T extends HTMLElement>(strength = 0.28) {
 }
 
 /* Kanał zdarzeń między sekcjami: quiz → kalkulator → rezerwacja przekazują sobie wybór. */
-export type Handoff = { level_key?: string; duration?: number; weekly?: number; source?: string };
+export type Handoff = {
+  level_key?: string; subject_key?: string; duration?: number; weekly?: number; source?: string;
+  /** "contact" = formularz „Zapytaj o zajęcia” (bez kasowania wpisanej wiadomości); brak = rezerwacja */
+  target?: "contact" | "booking";
+};
 const HANDOFF = "kk:handoff";
 export function emitHandoff(detail: Handoff) {
   window.dispatchEvent(new CustomEvent<Handoff>(HANDOFF, { detail }));

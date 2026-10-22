@@ -46,6 +46,8 @@ export default function Booking({ offer, rules }: { offer: Offer; rules: Booking
   const [flash, setFlash] = React.useState(false);
 
   useHandoff((h) => {
+    /* „Zapytaj o zajęcia” idzie do formularza kontaktu, nie do rezerwacji */
+    if (h.target === "contact") return;
     if (h.level_key && levels.some((l) => l.key === h.level_key)) setLevelKey(h.level_key);
     if (h.duration && durations.includes(h.duration)) setDuration(h.duration);
     if (h.weekly) setWeekly(h.weekly);
