@@ -17,7 +17,7 @@ const CAPTIONS: { at: number; say: string; mood: MascotMood }[] = [
   { at: 0.78, say: "Widzisz? Krok po kroku i zadanie zrobione.", mood: "happy" },
 ];
 
-export default function Hero({ title, subtitle }: { title: string | null; subtitle: string | null }) {
+export default function Hero({ title, subtitle, modes = [] }: { title: string | null; subtitle: string | null; modes?: string[] }) {
   const root = React.useRef<HTMLElement>(null);
   const stage = React.useRef<HTMLDivElement>(null);
   const board = React.useRef<HTMLDivElement>(null);
@@ -119,7 +119,7 @@ export default function Hero({ title, subtitle }: { title: string | null; subtit
 
         <div className="wrap hero__grid">
           <div className="hero__copy">
-            <span className="eyebrow">Korepetycje · online i na miejscu</span>
+            <span className="eyebrow">{modes.includes("online") && modes.includes("stationary") ? "Korepetycje · online i na miejscu" : modes.includes("online") ? "Korepetycje · online" : modes.includes("stationary") ? "Korepetycje · na miejscu" : "Korepetycje"}</span>
             <KineticTitle text={heading} className="h-display hero__title" />
             <p className="hero__sub">
               {subtitle?.trim() ? (

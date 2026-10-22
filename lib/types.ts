@@ -135,7 +135,7 @@ export const EMPTY_OFFER: Offer = {
   levels: [],
   discounts: [],
   weeks_per_month: 4,
-  modes: ["online", "stationary"],
+  modes: [],
   notes: null,
 };
 

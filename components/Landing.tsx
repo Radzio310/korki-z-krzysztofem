@@ -42,7 +42,7 @@ export default function Landing({ site }: { site: Site | null }) {
       <Cursor />
       <div className="grain" aria-hidden="true" />
       <Nav />
-      <Hero title={content.hero_title} subtitle={content.hero_subtitle} />
+      <Hero title={content.hero_title} subtitle={content.hero_subtitle} modes={offer.modes} />
       <Marquee items={tape} />
       <About content={content} />
       <Timeline steps={content.timeline || []} />

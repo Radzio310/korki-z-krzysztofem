@@ -23,13 +23,13 @@ export default function Booking({ offer, rules }: { offer: Offer; rules: Booking
   const root = useReveal<HTMLElement>();
   const levels = offer.levels.filter((l) => l.active);
   const durations = offer.durations.length ? offer.durations : [60];
-  const modes = offer.modes.length ? offer.modes : ["online"];
+  const modes = offer.modes;
 
   const [step, setStep] = React.useState<Step>(0);
   const [levelKey, setLevelKey] = React.useState<string | undefined>(levels[0]?.key);
   const [subjectKey, setSubjectKey] = React.useState<string | undefined>(offer.subjects[0]?.key);
   const [duration, setDuration] = React.useState(durations.includes(60) ? 60 : durations[0]);
-  const [mode, setMode] = React.useState(modes[0]);
+  const [mode, setMode] = React.useState<string | null>(modes[0] ?? null);
   const [weekly, setWeekly] = React.useState(1);
 
   const [from, setFrom] = React.useState(() => warsawDay());
@@ -349,7 +349,7 @@ export default function Booking({ offer, rules }: { offer: Offer; rules: Booking
                       <div className="bk__ticket-top">
                         <span className={`bk__status bk__status--${done.status}`}>{done.status === "confirmed" ? "Potwierdzona" : "Czeka na potwierdzenie"}</span>
                         <h3 className="h-card">{fmtLong(done.starts_at)}</h3>
-                        <p className="bk__ticket-time">{fmtTime(done.starts_at)} · {done.duration_minutes} min · {MODES[mode] || mode}</p>
+                        <p className="bk__ticket-time">{fmtTime(done.starts_at)} · {done.duration_minutes} min{mode ? ` · ${MODES[mode] || mode}` : ""}</p>
                       </div>
                       <div className="bk__ticket-cut" aria-hidden="true" />
                       <div className="bk__ticket-bot">
@@ -373,7 +373,7 @@ export default function Booking({ offer, rules }: { offer: Offer; rules: Booking
                 <div><dt>Poziom</dt><dd>{level?.name || "—"}</dd></div>
                 {offer.subjects.length ? <div><dt>Przedmiot</dt><dd>{offer.subjects.find((s) => s.key === subjectKey)?.name || "—"}</dd></div> : null}
                 <div><dt>Długość</dt><dd>{duration} min</dd></div>
-                <div><dt>Forma</dt><dd>{MODES[mode] || mode}</dd></div>
+                {mode ? <div><dt>Forma</dt><dd>{MODES[mode] || mode}</dd></div> : null}
                 <div className={slot ? "is-set" : ""}><dt>Termin</dt><dd>{slot ? <>{fmtLong(slot)}, {fmtTime(slot)}</> : "wybierz w kroku 2"}</dd></div>
               </dl>
               {price != null ? (
