@@ -1,0 +1,7 @@
+.pp { min-height: 100svh; background: var(--bg); padding: 40px var(--gutter) 100px; }
+.pp__wrap { max-width: 760px; margin: 0 auto; display: grid; gap: 18px; }
+.pp__back { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; color: var(--accent); margin-bottom: 24px; }
+.pp h2 { margin-top: 22px; font: 700 22px/1.2 var(--font-display); color: var(--fg-strong); }
+.pp p, .pp li { color: var(--fg-body); }
+.pp ul { display: grid; gap: 10px; padding-left: 20px; margin: 0; }
+.pp b { color: var(--fg-strong); }
