@@ -186,7 +186,16 @@ wersją dostaje 409, a panel się odświeża.
 
 - Repo: `https://github.com/Radzio310/Communio_serwer`. Lokalnie zwykle
   `C:\Users\radek\Desktop\PROJECTS\Communio_serwer` (sprawdź). **Przeczytaj jego `CLAUDE.md`.**
-- Praca sesji w chmurze leży na gałęzi **`claude/korki-krzysztofem-redesign-9xf0k4`** tego repo.
+- Praca sesji w chmurze leży na gałęzi **`claude/korki-krzysztofem-redesign-9xf0k4`** tego repo
+  (commit `1c9ef37`, wypchnięty, **niescalony** do `main`). Stan bramek przy oddaniu: 102 nowe testy
+  `test_korki_*` zielone, `test_authz_coverage` i `test_migrations` zielone, jedna głowa Alembic
+  `a5c7e9b1d3f8` (down: `c2a4e6f8b0d1`). W pełnym `pytest` 8 porażek **przedistniejących**, nie
+  od modułu: `test_ai_costs::test_kazde_narzedzie_modelu_ma_swoja_funkcje`, 5× `test_people.py`
+  (SQLite parser stack overflow), `test_group_cover.py::test_zywiol_…`, oraz niestabilny
+  `test_song_import_save.py::test_kilka_spiewnikow_…` (przecieka stan innego testu).
+- Odstępstwa od pierwotnego kontraktu są wpisane w `docs/KONTRAKT_API.md` (m.in. błędy walidacji
+  jako 400 ze zdaniem po polsku, `offer.modes` domyślnie puste, `price_grosze` po rabacie pakietu,
+  podgląd ucznia z `can_cancel`, limit per IP z ostatniego wpisu `X-Forwarded-For`).
   Najpierw sprawdź, czy gałąź istnieje i czy jest już scalona do `main`:
   ```bash
   git fetch origin
