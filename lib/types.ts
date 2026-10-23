@@ -63,7 +63,34 @@ export type Site = {
 };
 
 export type SlotDay = { date: string; slots: string[] };
-export type Slots = { timezone: string; duration: number; days: SlotDay[] };
+export type Slots = { timezone: string; duration: number; enabled?: boolean; days: SlotDay[] };
+
+/* POST /korki/public/bookings */
+export type BookingRequest = {
+  client_id: string;
+  starts_at: string;
+  duration_minutes: number;
+  level_key: string | null;
+  subject_key: string | null;
+  mode: string | null;
+  weekly_lessons: number;
+  student_name: string;
+  email: string;
+  phone: string | null;
+  message: string | null;
+  consent: true;
+  /** pułapka na boty — zawsze pusty string od człowieka */
+  website: string;
+};
+export type BookingCreated = {
+  id: number;
+  token: string;
+  status: BookingStatus;
+  starts_at: string;
+  ends_at: string;
+  duration_minutes: number;
+  price_grosze: number | null;
+};
 
 export type BookingStatus = "pending" | "confirmed" | "cancelled" | "done" | "no_show";
 
@@ -127,6 +154,41 @@ export type QuizResult = {
   results: { id: number; correct: boolean; correct_index: number; explanation: string | null }[];
 };
 
+/* ── Kontakt: POST /korki/public/contact (docs/KONTRAKT_API.md) ───────────── */
+export type ContactSubject = "matematyka" | "chemia";
+export type ContactLevel = "sp_1_4" | "sp_5_8" | "liceum" | "inny";
+export type ContactMode = "stationary" | "online" | "any";
+
+export type ContactRequest = {
+  name: string;
+  subjects: ContactSubject[];
+  level: ContactLevel;
+  mode: ContactMode;
+  email?: string;
+  phone?: string;
+  class_info?: string;
+  message?: string;
+  consent?: boolean;
+  /** pułapka na boty — zawsze pusty string od człowieka */
+  website: string;
+};
+export type ContactResponse = { ok: true; request_id: string };
+
+/** Wiadomość z formularza w panelu (GET /korki/panel/messages). Starsze wiadomości nie mają nowych pól. */
+export type ContactMessage = {
+  id: number;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  message: string | null;
+  subjects?: string[] | null;
+  level?: string | null;
+  mode?: string | null;
+  class_info?: string | null;
+  read: boolean;
+  created_at: string;
+};
+
 export type List<T> = { rows: T[]; total: number };
 
 export const EMPTY_OFFER: Offer = {
@@ -135,7 +197,7 @@ export const EMPTY_OFFER: Offer = {
   levels: [],
   discounts: [],
   weeks_per_month: 4,
-  modes: ["online", "stationary"],
+  modes: [],
   notes: null,
 };
 

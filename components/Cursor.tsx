@@ -20,6 +20,7 @@ export default function Cursor() {
     const rx = gsap.quickTo(r, "x", { duration: 0.45, ease: "power3" });
     const ry = gsap.quickTo(r, "y", { duration: 0.45, ease: "power3" });
     let seen = false;
+    let lastT: HTMLElement | null = null;
     const move = (e: PointerEvent) => {
       if (!seen) {
         seen = true;
@@ -27,11 +28,16 @@ export default function Cursor() {
         document.documentElement.classList.add("cursor-on");
       }
       dx(e.clientX); dy(e.clientY); rx(e.clientX); ry(e.clientY);
+      /* stan liczymy tylko, gdy wskaźnik wszedł na inny element (nie przy każdym pikselu) */
       const t = e.target as HTMLElement;
+      if (t === lastT) return;
+      lastT = t;
       const board = !!t.closest?.(".board__canvas");
-      const hot = !board && !!t.closest?.("a, button, [role='radio'], [role='option'], input, textarea, label, .rv, .tl__card");
-      r.dataset.state = board ? "board" : hot ? "hot" : "";
-      d.dataset.state = board ? "board" : "";
+      const hot = !board && !!t.closest?.("a, button, [role='radio'], [role='option'], [role='tab'], input, textarea, label, .vo__deck");
+      const st = board ? "board" : hot ? "hot" : "";
+      if (r.dataset.state !== st) r.dataset.state = st;
+      const ds = board ? "board" : "";
+      if (d.dataset.state !== ds) d.dataset.state = ds;
     };
     const down = () => r.classList.add("is-down");
     const up = () => r.classList.remove("is-down");
@@ -59,12 +65,13 @@ export default function Cursor() {
       <style>{`
         .cur { position: fixed; left: 0; top: 0; z-index: 200; pointer-events: none; opacity: 0; transition: opacity .3s; }
         .has-cursor.cursor-on .cur { opacity: 1; }
-        .cur__dot { width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: var(--accent); }
-        .cur__dot[data-state="board"] { width: 4px; height: 4px; margin: -2px 0 0 -2px; background: var(--board-ink); }
-        .cur__ring { width: 38px; height: 38px; margin: -19px 0 0 -19px; border-radius: 50%; border: 1.5px solid color-mix(in oklab, var(--accent) 60%, transparent); transition: width .35s var(--ease-spring), height .35s var(--ease-spring), margin .35s var(--ease-spring), background .3s, border-color .3s, opacity .3s; }
-        .cur__ring[data-state="hot"] { width: 64px; height: 64px; margin: -32px 0 0 -32px; background: color-mix(in oklab, var(--accent) 12%, transparent); border-color: transparent; }
-        .cur__ring[data-state="board"] { width: 22px; height: 22px; margin: -11px 0 0 -11px; border-style: dashed; border-color: var(--board-ink-soft); }
-        .cur__ring.is-down { width: 26px; height: 26px; margin: -13px 0 0 -13px; }
+        /* Rozmiar zmienia się przez scale (kompozytor), nie przez width/height — zero przeliczeń układu. */
+        .cur__dot { width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: var(--accent); transition: scale .25s var(--ease-out), background .3s, opacity .3s; }
+        .cur__dot[data-state="board"] { scale: .5; background: var(--board-ink); }
+        .cur__ring { width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; border: 1.5px solid color-mix(in oklab, var(--accent) 60%, transparent); scale: .6; transition: scale .35s var(--ease-spring), background .3s, border-color .3s, opacity .3s; }
+        .cur__ring[data-state="hot"] { scale: 1; background: color-mix(in oklab, var(--accent) 12%, transparent); border-color: transparent; }
+        .cur__ring[data-state="board"] { scale: .34; border-style: dashed; border-color: var(--board-ink-soft); }
+        .cur__ring.is-down { scale: .42; }
         @media (pointer: coarse) { .cur { display: none; } }
       `}</style>
     </>

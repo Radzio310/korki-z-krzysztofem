@@ -1,5 +1,5 @@
 .sh { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 20px; }
-.sh__scrim { position: absolute; inset: 0; background: rgba(2, 11, 22, .6); backdrop-filter: blur(6px); opacity: 0; transition: opacity 400ms var(--ease-out); }
+.sh__scrim { position: absolute; inset: 0; background: var(--scrim); backdrop-filter: blur(6px); opacity: 0; transition: opacity 400ms var(--ease-out); }
 .sh.is-open .sh__scrim { opacity: 1; }
 .sh__panel {
   position: relative; width: min(560px, 100%); max-height: min(88svh, 900px); overflow: auto;

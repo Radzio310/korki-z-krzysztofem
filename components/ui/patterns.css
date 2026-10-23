@@ -1,0 +1,30 @@
+/* Wzory w tle + latarka. Kolor wzorów pochodzi z tokenów (plik działa jako maska),
+   więc ten sam obraz jest jasny na granacie i granatowy na papierze. */
+.pat { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; contain: strict; }
+.pat__layer {
+  position: absolute; inset: 0;
+  -webkit-mask: url("/images/wzory-1600.webp") center / cover no-repeat;
+  mask: url("/images/wzory-1600.webp") center / cover no-repeat;
+}
+@media (max-width: 760px) {
+  .pat__layer {
+    -webkit-mask-image: url("/images/wzory-900.webp");
+    mask-image: url("/images/wzory-900.webp");
+  }
+}
+.pat__dim { background: var(--pattern-dim); }
+.pat__lamp {
+  position: absolute; left: 0; top: 0;
+  width: var(--lamp); height: var(--lamp);
+  border-radius: 50%;
+  -webkit-mask: radial-gradient(closest-side, black 35%, transparent 100%);
+  mask: radial-gradient(closest-side, black 35%, transparent 100%);
+  will-change: transform;
+}
+.pat__glow { position: absolute; inset: 0; background: radial-gradient(closest-side, var(--beam), transparent); }
+.pat__inner { position: absolute; left: 0; top: 0; width: var(--pw, 100vw); height: var(--ph, 100vh); will-change: transform; }
+.pat__lit { background: var(--pattern-lit); }
+
+@media (prefers-reduced-motion: reduce) {
+  .pat__lamp, .pat__inner { will-change: auto; }
+}
