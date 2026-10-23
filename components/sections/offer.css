@@ -6,7 +6,7 @@
 .of:has(#of-chem:checked) .of__tint--mat { opacity: 0; }
 .of:has(#of-chem:checked) .of__tint--chem { opacity: 1; }
 
-.of__top { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 24px clamp(32px, 5vw, 80px); align-items: end; margin-bottom: clamp(80px, 9vw, 112px); }
+.of__top { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 24px clamp(32px, 5vw, 80px); align-items: end; margin-bottom: clamp(48px, 6vw, 80px); }
 .of__head { display: grid; gap: 18px; justify-items: start; }
 .of__head .h-section { max-width: 14ch; }
 .of__side { display: grid; gap: 22px; justify-items: start; }
@@ -44,34 +44,47 @@
 .of:has(#of-chem:checked) .of__panel--mat { display: none; }
 .of:has(#of-mat:checked) .of__panel--chem { display: none; }
 
-/* ── Matematyka: trzy karty z tarczami ─────────────────────────────────── */
-.of__panel--mat { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(18px, 2.4vw, 28px); align-items: stretch; }
-.of__card {
-  position: relative;
-  display: flex; flex-direction: column; gap: 12px;
-  padding: 0 clamp(20px, 2.2vw, 28px) clamp(22px, 2.4vw, 28px);
-  border-radius: var(--r-xl);
-  background: linear-gradient(180deg, var(--glass-hi), transparent 40%), var(--glass);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-2);
-  backdrop-filter: blur(20px) saturate(1.2);
-  transition: border-color var(--dur-3), transform var(--dur-3) var(--ease-spring);
-  animation: of-card 900ms var(--ease-spring) backwards;
-  animation-delay: calc(var(--i) * 110ms);
+/* ── Matematyka: trasa przez trzy przystanki (każdy wyżej — wspinaczka ku maturze) ── */
+.of__route { --step: 90px; --disc: 180px; position: relative; }
+.of__road { position: absolute; left: 0; top: 0; width: 100%; height: 400px; overflow: visible; pointer-events: none; z-index: 0; }
+.of__road-bed { fill: none; stroke: var(--border); stroke-width: 14; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.of__road-line {
+  fill: none; stroke: var(--accent); stroke-width: 2.4; stroke-linecap: round; vector-effect: non-scaling-stroke;
+  /* rysowanie trasy = stroke-dashoffset (atrybut SVG), raz po wejściu sekcji */
+  stroke-dasharray: 1; stroke-dashoffset: 1;
+  transition: stroke-dashoffset 1.8s var(--ease-io) .2s;
 }
-.of:not([data-in="1"]) .of__card { animation-play-state: paused; }
-.of__card:hover { border-color: color-mix(in oklab, var(--accent) 45%, transparent); transform: translateY(-4px); }
-@keyframes of-card { from { opacity: 0; transform: translateY(44px) scale(.97); } }
+.of[data-in="1"] .of__road-line { stroke-dashoffset: 0; }
+.of__stops { position: relative; z-index: 1; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: clamp(20px, 3vw, 48px); align-items: start; }
+.of__stop {
+  position: relative;
+  display: flex; flex-direction: column; gap: 10px;
+  margin-top: calc(var(--lift) * var(--step));
+  opacity: 0; transform: translateY(40px);
+  transition: opacity 700ms var(--ease-out), transform 900ms var(--ease-spring);
+  transition-delay: calc(400ms + var(--i) * 260ms);
+}
+.of[data-in="1"] .of__stop { opacity: 1; transform: none; }
 
-.of__target { position: relative; width: 64%; aspect-ratio: 1; margin: -64px auto 6px; }
+.of__target { position: relative; width: var(--disc); aspect-ratio: 1; margin: 0 auto 8px; }
 .of__target img {
   width: 100%; height: 100%; object-fit: contain;
   filter: drop-shadow(var(--drop));
   animation: of-sway var(--t, 8s) ease-in-out infinite alternate;
   transition: scale var(--dur-3) var(--ease-spring);
 }
-.of__card:hover .of__target img { scale: 1.05; }
+.of__stop:hover .of__target img { scale: 1.06; }
 @keyframes of-sway { from { transform: rotate(-4deg); } to { transform: rotate(3deg) translateY(-4px); } }
+.of__num {
+  position: absolute; left: -6px; top: 4px;
+  font: 800 34px/1 var(--font-display); letter-spacing: -.04em;
+  color: var(--accent);
+  rotate: -8deg;
+}
+.of__flag { position: absolute; right: -10px; top: -34px; width: 40px; height: 56px; overflow: visible; }
+.of__pole { stroke: var(--fg-mid); stroke-width: 2.4; stroke-linecap: round; }
+.of__cloth { fill: var(--gold); transform-box: fill-box; transform-origin: 0 50%; animation: of-flag 2.6s var(--ease-wave) infinite alternate; }
+@keyframes of-flag { from { transform: skewY(-4deg) scaleX(.94); } to { transform: skewY(5deg) scaleX(1.04); } }
 .of__hitring { position: absolute; left: 38%; top: 38%; width: 24%; height: 24%; border-radius: 50%; border: 3px solid var(--accent); opacity: 0; pointer-events: none; }
 .of__target.is-hit { animation: of-hit 480ms var(--ease-out); }
 .of__target.is-hit .of__hitring { animation: of-ring 700ms var(--ease-out); }
@@ -81,15 +94,12 @@
 .of__tag { font: 700 12.5px/1.3 var(--font-body); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
 .of__for { color: var(--fg-body); }
 .of__points { list-style: none; margin: 2px 0 0; padding: 0; display: grid; gap: 8px; }
-.of__points li { position: relative; padding-left: 26px; color: var(--fg-body); font-size: 15.5px; line-height: 1.5; }
-.of__points li::before {
-  content: ""; position: absolute; left: 2px; top: .5em; width: 12px; height: 12px; border-radius: 50%;
-  border: 2.5px solid var(--accent); box-shadow: inset 0 0 0 2.5px var(--bg-elev);
-  background: var(--accent);
-}
+.of__points li { position: relative; padding-left: 24px; color: var(--fg-body); font-size: 15.5px; line-height: 1.5; }
+.of__points li::before { content: "→"; position: absolute; left: 0; top: -.02em; font: 700 17px/1.5 var(--font-chalk); color: var(--gold); }
 .of__price { font-size: 14.5px; color: var(--fg-mid); }
 .of__price b { color: var(--fg-strong); }
-.of__card .of__ask { margin-top: auto; align-self: stretch; }
+.of__stop .of__ask { margin-top: 8px; align-self: flex-start; }
+.of__empty { display: grid; justify-items: start; gap: 20px; padding: 40px 0; }
 
 /* ── Chemia: jedna szeroka karta, cząsteczka do stukania ───────────────── */
 .of__chem {
@@ -125,17 +135,30 @@
 .mol:hover .mol__ring { fill: color-mix(in oklab, var(--accent-2) 18%, transparent); }
 .mol.is-hit { animation: of-hit 480ms var(--ease-out); }
 
+@media (max-width: 1080px) {
+  .of__route { --disc: 150px; --step: 70px; }
+}
 @media (max-width: 899px) {
-  .of__panel--mat { grid-template-columns: 1fr; gap: 72px; }
-  .of__target { width: 46%; margin-top: -54px; }
+  /* telefon: trasa pionowa — przystanki jeden pod drugim, droga biegnie wzdłuż lewej krawędzi */
+  .of__road { display: none; }
+  .of__stops { grid-template-columns: 1fr; gap: 44px; padding-left: 28px; }
+  .of__stops::before { content: ""; position: absolute; left: 8px; top: 20px; bottom: 20px; width: 0; border-left: 2.5px dashed color-mix(in oklab, var(--accent) 55%, transparent); }
+  .of__stop { margin-top: 0; }
+  .of__stop::before { content: ""; position: absolute; left: -27px; top: 52px; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 5px var(--bg); }
+  .of__target { --disc: 116px; margin: 0 0 4px; }
+  .of__num { font-size: 26px; }
   .of__chem { grid-template-columns: 1fr; }
   .mol { max-width: 260px; }
-  .of__top { grid-template-columns: 1fr; margin-bottom: 76px; }
+  .of__top { grid-template-columns: 1fr; margin-bottom: 48px; }
   .of__switch { display: grid; width: 100%; }
+  .of__stop .of__ask { align-self: stretch; }
 }
 @media (scripting: none) {
-  .of__card, .of__chem { animation: none; }
+  .of__stop, .of__chem { opacity: 1; transform: none; animation: none; }
+  .of__road-line { stroke-dashoffset: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .of__card, .of__chem, .of__target img, .mol__spin, .mol__atom, .mol__h { animation: none; }
+  .of__stop { opacity: 1; transform: none; transition: none; }
+  .of__road-line { stroke-dashoffset: 0; transition: none; }
+  .of__chem, .of__target img, .mol__spin, .mol__atom, .mol__h, .of__cloth { animation: none; }
 }

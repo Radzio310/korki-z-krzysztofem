@@ -73,8 +73,10 @@ export const CHEMISTRY = {
 export const OFFER_HEAD = {
   eyebrow: "Oferta",
   title: "Każdy poziom wymaga innego podejścia",
-  lead: "Wybierz przedmiot, a potem poziom. Przycisk przy karcie od razu ustawi go w formularzu kontaktu.",
+  lead: "Wybierz przedmiot, a potem przystanek na trasie. Przycisk przy poziomie od razu ustawi go w formularzu kontaktu.",
   levelCta: "Zapytaj o ten poziom",
+  empty: "Poziomy właśnie się układają — napisz, a ustalimy zakres.",
+  emptyCta: "Zapytaj o zajęcia",
 };
 
 /* Poziomy dla kalkulatora i rezerwacji, gdy panel nie ma jeszcze własnych. Bez cen —

@@ -48,11 +48,13 @@ export default function Hero({ title, subtitle }: { title: string | null; subtit
   /* Przy zjeździe w dół tekst odpływa odrobinę szybciej niż portret — głębia bez przypinania. */
   React.useEffect(() => {
     const el = root.current;
-    if (!el || reducedMotion()) return;
+    /* Tylko na szerokim ekranie: na telefonie kolumna tekstu jest rozłożona wokół portretu
+       (display: contents), więc nie ma czego przesuwać — i oszczędzamy pracę w klatce. */
+    if (!el || reducedMotion() || !matchMedia("(min-width: 900px)").matches) return;
     const { gsap } = ensureGsap();
     const ctx = gsap.context(() => {
-      gsap.to(".hero__copy", { yPercent: -8, opacity: 0.35, ease: "none", scrollTrigger: { trigger: el, start: "top top", end: "bottom top", scrub: 0.4 } });
-      gsap.to(".hero__horizon", { yPercent: 40, ease: "none", scrollTrigger: { trigger: el, start: "top top", end: "bottom top", scrub: 0.4 } });
+      gsap.to(".hero__copy", { yPercent: -8, opacity: 0.35, ease: "none", scrollTrigger: { trigger: el, start: "top top", end: "bottom top", scrub: true } });
+      gsap.to(".hero__horizon", { yPercent: 40, ease: "none", scrollTrigger: { trigger: el, start: "top top", end: "bottom top", scrub: true } });
     }, el);
     return () => ctx.revert();
   }, []);

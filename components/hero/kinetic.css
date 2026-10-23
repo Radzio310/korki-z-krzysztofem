@@ -1,14 +1,17 @@
-/* Żywy nagłówek (KineticTitle) — wspólny dla hero i nagłówków sekcji. */
+/* Żywy nagłówek (KineticTitle) — wspólny dla hero i nagłówków sekcji.
+   Twarda zasada: nic tu nie zmienia szerokości liter (waga, wdth, letter-spacing, font-size).
+   Ruch = translate/rotate + kolor na pudełku o stałym rozmiarze, łamanie wierszy stoi. */
 .kt { display: block; text-wrap: balance; }
 .kt__w { position: relative; display: inline-block; white-space: nowrap; }
-.kt__m { display: inline-block; overflow: hidden; padding: .08em 0 .14em; margin: -.08em 0 -.14em; vertical-align: top; }
+/* zapas od góry na uniesienie litery; ujemny margines oddaje go z powrotem, więc wiersz ma tę samą wysokość */
+.kt__m { display: inline-block; overflow: hidden; padding: .2em 0 .14em; margin: -.2em 0 -.14em; vertical-align: top; }
 .kt__c {
-  --w: 700; --s: 100; --lift: 0px;
+  --k: 0;
   display: inline-block;
-  font-variation-settings: "wght" var(--w), "wdth" var(--s);
-  font-weight: var(--w);
-  translate: 0 var(--lift);
-  transition: translate 300ms var(--ease-out);
+  color: color-mix(in oklab, var(--accent) calc(var(--k) * 72%), var(--fg-strong));
+  translate: 0 calc(var(--k) * -.1em);
+  rotate: calc(var(--k) * var(--tw, 0deg));
+  transition: translate 420ms var(--ease-spring), rotate 420ms var(--ease-spring), color 300ms var(--ease-out);
   animation: kt-in 1s var(--ease-spring) backwards;
   animation-delay: calc(140ms + var(--i) * 22ms);
 }
@@ -19,7 +22,7 @@
   to { opacity: 1; transform: none; }
 }
 
-.kt__w--accent .kt__c { color: var(--accent); }
+.kt__w--accent .kt__c { color: color-mix(in oklab, var(--accent-2) calc(var(--k) * 80%), var(--accent)); }
 .kt__orbit {
   position: absolute; left: -4%; right: -6%; bottom: -.1em; width: 110%; height: .32em;
   overflow: visible; pointer-events: none;
@@ -40,6 +43,6 @@
   .kt__orbit path { stroke-dashoffset: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .kt__c { animation: none; }
+  .kt__c { animation: none; translate: none; rotate: none; }
   .kt__orbit path { animation: none; stroke-dashoffset: 0; }
 }

@@ -1,5 +1,5 @@
 import type {
-  Booking, ContactRequest, ContactResponse, DailyTask, List, QuizQuestion, QuizResult, Review, Site, Slots, TaskCheck,
+  Booking, BookingCreated, BookingRequest, ContactRequest, ContactResponse, DailyTask, List, QuizQuestion, QuizResult, Review, Site, Slots, TaskCheck,
 } from "./types";
 
 export const API_BASE = (process.env.NEXT_PUBLIC_KORKI_API || "https://communioserwer-production.up.railway.app").replace(/\/$/, "");
@@ -95,7 +95,7 @@ export const publicApi = {
   site: () => api<Site>("/korki/public/site"),
   slots: (duration: number, from: string, days: number, signal?: AbortSignal) =>
     api<Slots>(`/korki/public/slots?duration=${duration}&from=${from}&days=${days}`, { signal }),
-  book: (body: Record<string, unknown>) => api<Booking & { token: string }>("/korki/public/bookings", { body }),
+  book: (body: BookingRequest, signal?: AbortSignal) => api<BookingCreated>("/korki/public/bookings", { body, signal }),
   booking: (token: string) => api<Booking>(`/korki/public/bookings/${encodeURIComponent(token)}`),
   cancel: (token: string, reason?: string) =>
     api<Booking>(`/korki/public/bookings/${encodeURIComponent(token)}/cancel`, { body: { reason: reason || null } }),

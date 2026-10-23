@@ -63,7 +63,34 @@ export type Site = {
 };
 
 export type SlotDay = { date: string; slots: string[] };
-export type Slots = { timezone: string; duration: number; days: SlotDay[] };
+export type Slots = { timezone: string; duration: number; enabled?: boolean; days: SlotDay[] };
+
+/* POST /korki/public/bookings */
+export type BookingRequest = {
+  client_id: string;
+  starts_at: string;
+  duration_minutes: number;
+  level_key: string | null;
+  subject_key: string | null;
+  mode: string | null;
+  weekly_lessons: number;
+  student_name: string;
+  email: string;
+  phone: string | null;
+  message: string | null;
+  consent: true;
+  /** pułapka na boty — zawsze pusty string od człowieka */
+  website: string;
+};
+export type BookingCreated = {
+  id: number;
+  token: string;
+  status: BookingStatus;
+  starts_at: string;
+  ends_at: string;
+  duration_minutes: number;
+  price_grosze: number | null;
+};
 
 export type BookingStatus = "pending" | "confirmed" | "cancelled" | "done" | "no_show";
 

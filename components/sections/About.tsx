@@ -32,7 +32,7 @@ function Counter({ value }: { value: string }) {
   return <span ref={ref}>{value}</span>;
 }
 
-/* Tekst z {fragmentami} do podświetlenia markerem. */
+/* Tekst z {fragmentami} do podświetlenia kredą. */
 function Marked({ text, on }: { text: string; on: string | null }) {
   const parts = text.split(/\{([^}]+)\}/);
   return (
@@ -42,37 +42,47 @@ function Marked({ text, on }: { text: string; on: string | null }) {
   );
 }
 
-/* O mnie: Krzysztof wynurza się z koła, gdy przewijasz (ten sam „bulaj” co w hero).
-   Cztery wartości to przyciski — każdy podkreśla markerem swój fragment tekstu. */
+/* O mnie. Zamiast siatki kafelków — „równanie” pisane kredą:
+   spokojnie + w praktyce + indywidualnie = ze zrozumieniem.
+   Składa się wyraz po wyrazie, gdy wjedzie na ekran (raz, nie przy każdej klatce scrolla).
+   Każdy wyraz to przycisk: podkreśla kredą swój fragment w tekście i pokazuje dopisek.
+   Portret wynurza się z koła raz po wejściu; napis biegnie tylko DOLNYM łukiem pierścienia,
+   a podpis stoi pod portretem — nic nie wchodzi na twarz. */
 export default function About({ content }: { content: Content }) {
   const root = useReveal<HTMLElement>();
+  const eq = React.useRef<HTMLDivElement>(null);
   const [on, setOn] = React.useState<string | null>(null);
   const title = content.about_title?.trim() || ABOUT.title;
   const customBody = content.about_body?.trim();
+  const values = ABOUT.values;
+  const active = values.find((v) => v.k === on);
 
-  /* Pierścień z napisem obraca się z przewijaniem. */
   React.useEffect(() => {
-    const el = root.current;
-    if (!el || reducedMotion()) return;
-    const { gsap } = ensureGsap();
-    const ctx = gsap.context(() => {
-      gsap.to(".ab__ring", { rotate: 140, ease: "none", scrollTrigger: { trigger: el, start: "top bottom", end: "bottom top", scrub: true } });
-    }, el);
-    return () => ctx.revert();
-  }, [root]);
+    const el = eq.current;
+    if (!el) return;
+    if (reducedMotion()) { el.dataset.in = "1"; return; }
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { el.dataset.in = "1"; io.disconnect(); } }, { rootMargin: "0px 0px -18% 0px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [customBody]);
+
+  const pick = (k: string) => setOn((c) => (c === k ? null : k));
 
   return (
     <section id="o-mnie" ref={root} className="section ab">
       <div className="wrap ab__grid">
         <div className="ab__visual">
-          <div className="ab__ring" aria-hidden="true">
-            <svg viewBox="0 0 200 200">
-              <defs><path id="ab-circle" d="M100 100 m -92 0 a 92 92 0 1 1 184 0 a 92 92 0 1 1 -184 0" /></defs>
-              <text><textPath href="#ab-circle">matematyka · chemia · krok po kroku · Mysłowice i online · </textPath></text>
+          <div className="ab__stagewrap">
+            <svg className="ab__ring" viewBox="0 0 100 100" aria-hidden="true">
+              <defs><path id="ab-arc" d="M5 57 A45 45 0 0 0 95 57" /></defs>
+              <text><textPath href="#ab-arc" startOffset="50%" textAnchor="middle">{ABOUT.ring}</textPath></text>
             </svg>
+            <Portrait mode="about" src={content.photo_url} alt={ABOUT.photoAlt} />
           </div>
-          <Portrait mode="about" src={content.photo_url} alt={ABOUT.photoAlt} />
-          <p className="ab__sign chalk" aria-hidden="true">{ABOUT.signature}</p>
+          <p className="ab__sign chalk" aria-hidden="true" data-reveal style={{ "--d": "500ms" } as React.CSSProperties}>
+            <span>{ABOUT.signature}</span>
+            <svg viewBox="0 0 220 18" preserveAspectRatio="none"><path pathLength={1} d="M4 12 C 50 4, 120 16, 216 6" /></svg>
+          </p>
         </div>
 
         <div className="ab__copy">
@@ -83,22 +93,32 @@ export default function About({ content }: { content: Content }) {
           </p>
 
           {!customBody ? (
-            <ul className="ab__values" aria-label="Jak uczę" data-reveal style={{ "--d": "220ms" } as React.CSSProperties}>
-              {ABOUT.values.map((v) => (
-                <li key={v.k}>
-                  <button
-                    type="button"
-                    aria-pressed={on === v.k}
-                    onClick={() => setOn((c) => (c === v.k ? null : v.k))}
-                    onPointerEnter={(e) => { if (e.pointerType === "mouse") setOn(v.k); }}
-                    onPointerLeave={(e) => { if (e.pointerType === "mouse") setOn(null); }}
-                  >
-                    <b>{v.label}</b>
-                    <small>{v.hint}</small>
-                  </button>
-                </li>
-              ))}
-            </ul>
+            <div className="ab__eq" ref={eq}>
+              <p className="ab__eqlabel">{ABOUT.eqLabel}</p>
+              <div className="ab__terms" role="group" aria-label={ABOUT.eqLabel}>
+                {values.map((v, i) => {
+                  const last = i === values.length - 1;
+                  return (
+                    <React.Fragment key={v.k}>
+                      {i > 0 ? <span className="ab__op" aria-hidden="true" style={{ "--s": i * 2 - 1 } as React.CSSProperties}>{last ? "=" : "+"}</span> : null}
+                      <button
+                        type="button"
+                        className={`ab__term chalk ${last ? "ab__term--sum" : ""}`}
+                        aria-pressed={on === v.k}
+                        style={{ "--s": i * 2 } as React.CSSProperties}
+                        onClick={() => pick(v.k)}
+                        onPointerEnter={(e) => { if (e.pointerType === "mouse") setOn(v.k); }}
+                        onPointerLeave={(e) => { if (e.pointerType === "mouse") setOn(null); }}
+                      >
+                        {v.label}
+                        <svg className="ab__scribble" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true"><path d="M2 6 C 25 3, 60 9, 98 4" /></svg>
+                      </button>
+                    </React.Fragment>
+                  );
+                })}
+              </div>
+              <p className="ab__note" aria-live="polite">{active ? active.hint : ABOUT.eqHint}</p>
+            </div>
           ) : null}
 
           {content.about_facts?.length ? (

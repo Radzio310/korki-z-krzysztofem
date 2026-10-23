@@ -32,13 +32,7 @@
 .ft__phone small { font: 700 11.5px/1 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: var(--on-deep-mid); }
 .ft__phone:hover { color: var(--sea-200); }
 .ft__social { display: flex; gap: 8px; }
-.ft__social a {
-  width: 44px; height: 44px; border-radius: 50%;
-  display: grid; place-items: center;
-  color: var(--on-deep); border: 1px solid var(--on-deep-line);
-  transition: background var(--dur-2), color var(--dur-2), transform var(--dur-3) var(--ease-spring);
-}
-.ft__social a:hover { background: var(--sea-200); color: var(--ocean-900); transform: translateY(-3px) rotate(-6deg); }
+.ft__social .orb { box-shadow: 0 0 0 1px var(--on-deep-line); }
 .ft__pi .pi__bubble { color: var(--fg-strong); }
 
 .ft__giant {

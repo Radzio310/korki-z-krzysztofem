@@ -56,14 +56,20 @@
 @keyframes hero-wheel { 0% { opacity: 0; transform: translate(-50%, -4px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, 12px); } }
 
 @media (max-width: 899px) {
-  .hero { min-height: 0; align-items: flex-start; padding-top: calc(var(--nav-h) + 24px); }
-  .hero__grid { grid-template-columns: 1fr; gap: 20px; }
-  .hero__copy { gap: 16px; }
-  .hero__title { font-size: clamp(36px, 10.4vw, 64px); }
-  .hero__visual { max-width: min(440px, 92vw); margin-top: 8px; }
+  .hero { min-height: 0; align-items: flex-start; padding-top: calc(var(--nav-h) + 16px); padding-bottom: 56px; }
+  /* Telefon: portret zaraz pod tytułem, żeby był na pierwszym ekranie (390×844). */
+  .hero__grid { grid-template-columns: 1fr; gap: 14px; }
+  .hero__copy { display: contents; }
+  .hero__eyebrow { order: 1; }
+  .hero__title { order: 2; font-size: clamp(34px, 9.6vw, 60px); }
+  .hero__visual { order: 3; max-width: min(320px, 78vw); margin: 6px 0 2px; }
+  .hero__lead { order: 4; }
+  .hero__cta { order: 5; margin-top: 4px; }
+  .hero__line { order: 6; }
   .hero__scroll { display: none; }
 }
 @media (max-width: 520px) {
+  .hero__eyebrow { font-size: 11.5px; letter-spacing: .14em; }
   .hero__line { display: grid; gap: 2px; }
   .hero__line i { display: none; }
   .hero__cta { width: 100%; }

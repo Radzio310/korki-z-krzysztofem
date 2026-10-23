@@ -8,7 +8,7 @@ import "./benefits.css";
 
 type IconName = (typeof BENEFITS.items)[number]["icon"];
 
-/* Ikony liniowe; każda ma własny drobny ruch w spoczynku (inny czas, inne opóźnienie). */
+/* Rysuneczki na marginesie zeszytu; każdy ma własny drobny ruch w spoczynku (inny czas, inne opóźnienie). */
 function Icon({ name }: { name: IconName }) {
   const p = { fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
   switch (name) {
@@ -29,11 +29,14 @@ function Icon({ name }: { name: IconName }) {
   }
 }
 
-/* Korzyści ze starej strony — bez pasków procentowych. Karty da się zaznaczyć („to mój cel”);
-   wybór zostaje w sessionStorage (`kk-goals`) i wraca przy następnym wejściu. */
+/* Korzyści jako lista kontrolna na wielkiej kartce z zeszytu w kratkę. Stuknięcie w wiersz
+   odhacza go kredą (w jasnym motywie — czerwonym długopisem nauczyciela) i podkreśla zakreślaczem.
+   Na dole przypięta karteczka liczy zaznaczone cele i prowadzi do kontaktu.
+   Wybór zostaje w sessionStorage (`kk-goals`). Bez JS lista jest zwykłą, czytelną listą. */
 export default function Benefits() {
   const root = useReveal<HTMLElement>();
   const [picked, setPicked] = React.useState<string[]>([]);
+  const [last, setLast] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     try {
@@ -48,15 +51,7 @@ export default function Benefits() {
       try { sessionStorage.setItem("kk-goals", JSON.stringify(next)); } catch { /* tryb prywatny */ }
       return next;
     });
-  };
-
-  /* Światło karty idzie za kursorem — jedna obsługa na całą siatkę. */
-  const glow = (e: React.PointerEvent<HTMLDivElement>) => {
-    const card = (e.target as HTMLElement).closest<HTMLElement>(".bn__card");
-    if (!card) return;
-    const r = card.getBoundingClientRect();
-    card.style.setProperty("--glow-x", `${((e.clientX - r.left) / r.width) * 100}%`);
-    card.style.setProperty("--glow-y", `${((e.clientY - r.top) / r.height) * 100}%`);
+    setLast(id);
   };
 
   const ask = () => {
@@ -65,6 +60,7 @@ export default function Benefits() {
   };
 
   const n = picked.length;
+  const total = BENEFITS.items.length;
   return (
     <section id="korzysci" ref={root} className="section bn">
       <div className="wrap">
@@ -74,31 +70,38 @@ export default function Benefits() {
           <p className="lead" data-reveal>{BENEFITS.lead}</p>
         </div>
 
-        <div className="bn__grid" onPointerMove={glow}>
-          {BENEFITS.items.map((b, i) => {
-            const on = picked.includes(b.id);
-            return (
-              <button
-                key={b.id}
-                type="button"
-                className={`bn__card ${on ? "is-on" : ""}`}
-                aria-pressed={on}
-                onClick={() => toggle(b.id)}
-                data-reveal
-                style={{ "--d": `${i * 70}ms` } as React.CSSProperties}
-              >
-                <span className="bn__icon" aria-hidden="true"><Icon name={b.icon} /></span>
-                <span className="bn__text">{b.text}</span>
-                <span className="bn__check" aria-hidden="true">
-                  <svg viewBox="0 0 24 24"><path d="M6 12.5l4 4 8-9" pathLength={1} /></svg>
-                </span>
-              </button>
-            );
-          })}
-          <div className="bn__card bn__close" data-reveal style={{ "--d": `${BENEFITS.items.length * 70}ms` } as React.CSSProperties}>
+        <div className="bn__sheet" data-reveal>
+          <span className="bn__holes" aria-hidden="true"><i /><i /><i /></span>
+          <ul className="bn__list" aria-label={BENEFITS.listLabel}>
+            {BENEFITS.items.map((b, i) => {
+              const on = picked.includes(b.id);
+              return (
+                <li key={b.id} className="bn__row" data-reveal style={{ "--d": `${120 + i * 80}ms`, "--j": i } as React.CSSProperties}>
+                  <span className="bn__doodle" aria-hidden="true"><Icon name={b.icon} /></span>
+                  <button
+                    type="button"
+                    className={`bn__item ${on ? "is-on" : ""} ${on && last === b.id ? "is-fresh" : ""}`}
+                    aria-pressed={on}
+                    onClick={() => toggle(b.id)}
+                  >
+                    <span className="bn__box" aria-hidden="true">
+                      <svg viewBox="0 0 40 40">
+                        <path className="bn__frame" d="M6 8 C 14 6, 26 7, 33 6 C 34 14, 33 26, 34 33 C 25 34, 14 33, 7 34 C 6 26, 7 15, 6 8 Z" />
+                        <path className="bn__tick" pathLength={1} d="M9 21 C 12 23, 15 27, 17 31 C 21 22, 28 12, 38 3" />
+                      </svg>
+                    </span>
+                    <span className="bn__text"><span>{b.text}</span></span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+
+          <div className="bn__note" data-reveal style={{ "--d": `${200 + total * 80}ms` } as React.CSSProperties}>
+            <span className="bn__tape" aria-hidden="true" />
             <p className="bn__closing chalk">{BENEFITS.closing}</p>
             <p className="bn__count" aria-live="polite">
-              {n ? <>Zaznaczone cele: <b>{n}</b></> : "Zaznacz karty, które pasują do Ciebie."}
+              {n ? <>{BENEFITS.countLabel} <b>{n}</b> / {total}</> : BENEFITS.countEmpty}
             </p>
             <button type="button" className="btn btn--primary" onPointerDown={ripple} onClick={ask}>{HERO.ctaPrimary}</button>
           </div>

@@ -2,7 +2,7 @@
 
 import React from "react";
 import ThemeToggle from "./ThemeToggle";
-import { CONTACT, HERO, IMAGES, NAV_LINKS } from "@/content/site";
+import { CONTACT, HERO, IMAGES, NAV_LINKS, NAV_LIVE } from "@/content/site";
 import { getLenis, ripple, useMagnet } from "@/lib/motion";
 import "./nav.css";
 
@@ -14,6 +14,8 @@ export default function Nav() {
   const [hidden, setHidden] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
   const [open, setOpen] = React.useState(false);
+  /* sekcja dla żywego środka paska na telefonie (wszystkie sekcje, nie tylko linki) */
+  const [now, setNow] = React.useState("top");
   const ringRef = React.useRef<SVGCircleElement>(null);
   const listRef = React.useRef<HTMLUListElement>(null);
   const pillRef = React.useRef<HTMLSpanElement>(null);
@@ -24,12 +26,21 @@ export default function Nav() {
   React.useEffect(() => {
     let last = window.scrollY;
     let raf = 0;
+    /* Wysokość strony mierzona tylko przy zmianie rozmiaru — czytanie scrollHeight w każdej
+       klatce przewijania wymuszało przeliczenie układu. */
+    let max = 1;
+    const measure = () => { max = document.documentElement.scrollHeight - innerHeight; };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(document.body);
+    /* Odczyt pozycji w zdarzeniu scroll (układ jest wtedy świeży), zapisy w rAF. */
+    let y = window.scrollY;
     const on = () => {
-      cancelAnimationFrame(raf);
+      y = window.scrollY;
+      if (raf) return;
       raf = requestAnimationFrame(() => {
-        const y = window.scrollY;
-        const max = document.documentElement.scrollHeight - innerHeight;
-        const p = max > 0 ? y / max : 0;
+        raf = 0;
+        const p = max > 0 ? Math.min(1, y / max) : 0;
         if (ringRef.current) ringRef.current.style.strokeDashoffset = String(100 - p * 100);
         setScrolled(y > 24);
         if (Math.abs(y - last) > 6) {
@@ -40,7 +51,7 @@ export default function Nav() {
     };
     on();
     window.addEventListener("scroll", on, { passive: true });
-    return () => window.removeEventListener("scroll", on);
+    return () => { window.removeEventListener("scroll", on); ro.disconnect(); cancelAnimationFrame(raf); };
   }, []);
 
   React.useEffect(() => {
@@ -52,6 +63,15 @@ export default function Nav() {
       },
       { rootMargin: "-40% 0px -50% 0px", threshold: [0, 0.2, 0.5] },
     );
+    els.forEach((e) => io.observe(e));
+    return () => io.disconnect();
+  }, []);
+
+  React.useEffect(() => {
+    const els = Object.keys(NAV_LIVE).map((id) => document.getElementById(id)).filter(Boolean) as HTMLElement[];
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) setNow(e.target.id); });
+    }, { rootMargin: "-42% 0px -52% 0px" });
     els.forEach((e) => io.observe(e));
     return () => io.disconnect();
   }, []);
@@ -104,6 +124,19 @@ export default function Nav() {
               <img className="nav__logo" src={IMAGES.logo.src} alt="" width={36} height={36} />
             </span>
             <span className="nav__word">Korki <em>z</em> Krzysztofem</span>
+          </a>
+
+          {/* Telefon: środek paska żyje — nazwa i sekcja, w której jesteś, pisana kredą.
+              Wszystkie etykiety leżą w jednej komórce; zmiana = opacity/transform, szerokość stoi. */}
+          <a href="#top" className="nav__live" aria-hidden="true" tabIndex={-1}>
+            <b>Korki <em>z</em> Krzysztofem</b>
+            <span className="nav__now">
+              {Object.entries(NAV_LIVE).map(([id, label], i) => (
+                <i key={id} className={now === id ? "is-on" : ""}>
+                  <span className="nav__glyph">{["π", "∑", "√", "Δ", "∞", "∫"][i % 6]}</span>{label}
+                </i>
+              ))}
+            </span>
           </a>
 
           <nav className="nav__links" aria-label="Sekcje">

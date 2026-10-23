@@ -28,12 +28,16 @@ export const ABOUT = {
   title: "Cześć, jestem Krzysztof.",
   /* Wersja skrócona z §9. Fragmenty w nawiasach klamrowych to wartości podświetlane po kliknięciu. */
   body: "Nazywam się Krzysztof Witkowicz. Od kilku lat pomagam uczniom zrozumieć matematykę i chemię. Stawiam na {spokojne wyjaśnienia}, {praktyczne ćwiczenia} i {podejście dopasowane do konkretnej osoby}. Chcę, żeby uczeń wiedział nie tylko, jaki jest wynik, ale też {skąd się bierze}.",
+  /* „Równanie” pod tekstem: trzy składniki i wynik. `k` = fragment tekstu podkreślany kredą. */
   values: [
-    { k: "spokojne wyjaśnienia", label: "Spokojnie", hint: "Wyjaśnienia bez pośpiechu" },
-    { k: "praktyczne ćwiczenia", label: "W praktyce", hint: "Ćwiczenia na zadaniach" },
-    { k: "podejście dopasowane do konkretnej osoby", label: "Indywidualnie", hint: "Pod konkretną osobę" },
-    { k: "skąd się bierze", label: "Ze zrozumieniem", hint: "Nie tylko wynik, ale skąd się bierze" },
+    { k: "spokojne wyjaśnienia", label: "spokojnie", hint: "Wyjaśnienia bez pośpiechu." },
+    { k: "praktyczne ćwiczenia", label: "w praktyce", hint: "Ćwiczenia na zadaniach." },
+    { k: "podejście dopasowane do konkretnej osoby", label: "indywidualnie", hint: "Pod konkretną osobę." },
+    { k: "skąd się bierze", label: "zrozumienie", hint: "Nie tylko wynik, ale skąd się bierze." },
   ],
+  eqLabel: "Jak uczę",
+  eqHint: "Stuknij składnik równania.",
+  ring: "matematyka · chemia · Mysłowice i online",
   signature: "Krzysztof Witkowicz",
   ctaContact: "Skontaktuj się ze mną",
   ctaReviews: "Sprawdź opinie",
@@ -44,7 +48,7 @@ export const ABOUT = {
 export const BENEFITS = {
   eyebrow: "Korzyści",
   title: "Co osiągniesz dzięki naszej współpracy?",
-  lead: "Zaznacz, na czym Ci zależy — to dobry początek pierwszej rozmowy.",
+  lead: "Odhacz, na czym Ci zależy — to dobry początek pierwszej rozmowy.",
   items: [
     { id: "egzaminy", text: "Solidne przygotowanie do egzaminów i testów", icon: "exam" },
     { id: "pewnosc", text: "Pewność siebie w rozwiązywaniu zadań", icon: "spark" },
@@ -55,6 +59,9 @@ export const BENEFITS = {
     { id: "logika", text: "Umiejętność logicznego myślenia", icon: "nodes" },
   ],
   closing: "To zależy już tylko od Ciebie…",
+  listLabel: "Cele do zaznaczenia",
+  countLabel: "Twoje cele:",
+  countEmpty: "Odhacz to, na czym Ci zależy.",
 } as const;
 
 /* „Jak pracuję” — propozycja opisu procesu z §9, do potwierdzenia przez właściciela. */
@@ -71,6 +78,22 @@ export const NAV_LINKS = [
   { id: "opinie", label: "Opinie" },
   { id: "faq", label: "FAQ" },
 ] as const;
+
+/* Żywy środek paska na telefonie: sekcja, w której jesteś (pisana kredą). */
+export const NAV_LIVE: Record<string, string> = {
+  top: "zacznijmy",
+  oferta: "oferta",
+  korzysci: "korzyści",
+  "jak-pracuje": "jak pracuję",
+  "o-mnie": "o mnie",
+  opinie: "opinie",
+  zadanie: "zadanie dnia",
+  quiz: "quiz 60 s",
+  cennik: "cennik",
+  rezerwacja: "rezerwacja",
+  faq: "pytania",
+  kontakt: "kontakt",
+};
 
 export const IMAGES = {
   portrait: { src: "/images/krzysztof-1024.webp", srcSet: "/images/krzysztof-640.webp 640w, /images/krzysztof-1024.webp 1024w", w: 1024, h: 1024 },

@@ -2,6 +2,7 @@
 
 import React from "react";
 import KineticTitle from "../hero/KineticTitle";
+import Mascot from "../Mascot";
 import type { Level } from "@/lib/types";
 import { CHEMISTRY, MATH_LEVELS, OFFER_HEAD, type MathLevel, type SubjectKey } from "@/content/offer";
 import { lessonPrice, zl } from "@/lib/pricing";
@@ -12,6 +13,25 @@ import "./offer.css";
 const SUBJECT_EVENT = "kk:subject";
 export function showSubject(key: SubjectKey) {
   window.dispatchEvent(new CustomEvent<SubjectKey>(SUBJECT_EVENT, { detail: key }));
+}
+
+/* Trasa przez poziomy: każdy kolejny przystanek leży wyżej (wspinaczka ku maturze).
+   Ścieżka w układzie 1000 × ROAD_H, rozciągana na szerokość; punkty = środki tarcz. */
+const ROAD_H = 400;
+const STEP = 90; // px różnicy wysokości między przystankami (to samo co --step w CSS)
+const DISC = 180; // px średnicy tarczy (to samo co --disc w CSS)
+function roadPath(n: number) {
+  const pts = Array.from({ length: n }, (_, i) => ({ x: ((i + 0.5) / n) * 1000, y: (n - 1 - i) * STEP + DISC / 2 }));
+  if (!pts.length) return "";
+  let d = `M0 ${pts[0].y + 70} C ${pts[0].x * 0.5} ${pts[0].y + 60}, ${pts[0].x * 0.7} ${pts[0].y}, ${pts[0].x} ${pts[0].y}`;
+  for (let i = 1; i < pts.length; i++) {
+    const a = pts[i - 1], b = pts[i];
+    const mx = (a.x + b.x) / 2;
+    d += ` C ${mx} ${a.y}, ${mx} ${b.y}, ${b.x} ${b.y}`;
+  }
+  const z = pts[pts.length - 1];
+  d += ` C ${z.x + (1000 - z.x) * 0.5} ${z.y}, ${1000 - 20} ${Math.max(10, z.y - 50)}, 1000 ${Math.max(6, z.y - 60)}`;
+  return d;
 }
 
 /* Poziom z panelu bez własnej karty dostaje najbliższą ilustrację po kluczu/nazwie. */
@@ -86,7 +106,7 @@ export default function Offer({ levels }: { levels: Level[] }) {
 
   /* Strzała w tarczę, potem przejście do formularza z ustawionym przedmiotem i poziomem. */
   const ask = (e: React.MouseEvent<HTMLButtonElement>, subject_key: SubjectKey, level_key?: string, label?: string) => {
-    const card = e.currentTarget.closest<HTMLElement>(".of__card, .of__chem");
+    const card = e.currentTarget.closest<HTMLElement>(".of__stop, .of__chem");
     const target = card?.querySelector<HTMLElement>(".of__target, .mol");
     if (target && !reducedMotion()) {
       target.classList.remove("is-hit");
@@ -94,7 +114,7 @@ export default function Offer({ levels }: { levels: Level[] }) {
       target.classList.add("is-hit");
     }
     emitHandoff({ target: "contact", subject_key, level_key, source: "offer" });
-    setSaid(`Ustawiono w formularzu: ${subject_key === "chemia" ? "Chemia" : `Matematyka, ${label}`}.`);
+    setSaid(`Ustawiono w formularzu: ${subject_key === "chemia" ? "Chemia" : label ? `Matematyka, ${label}` : "Matematyka"}.`);
     window.setTimeout(() => scrollToTarget("#kontakt"), reducedMotion() ? 0 : 420);
   };
 
@@ -126,31 +146,54 @@ export default function Offer({ levels }: { levels: Level[] }) {
         </div>
 
         <div className="of__panel of__panel--mat" role="group" aria-label="Matematyka — poziomy">
-          {cards.map((c, i) => {
-            const lvl = levels[i];
-            const price = lessonPrice(lvl, 60);
-            return (
-              <article key={c.key} className="of__card" style={{ "--i": i } as React.CSSProperties}>
-                <div className="of__target" style={{ "--t": `${7 + i * 1.7}s` } as React.CSSProperties}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={c.image} alt={c.imageAlt} width={640} height={640} loading="lazy" decoding="async" />
-                  <span className="of__hitring" aria-hidden="true" />
-                </div>
-                <p className="of__tag">{c.tag}</p>
-                <h3 className="h-card">{c.title}</h3>
-                <p className="of__for">{c.forWhom}</p>
-                {c.points.length ? (
-                  <ul className="of__points">
-                    {c.points.map((p) => <li key={p}>{p}</li>)}
-                  </ul>
-                ) : null}
-                {price != null ? <p className="of__price">Lekcja 60 min: <b>{zl(price)}</b></p> : null}
-                <button type="button" className="btn btn--primary of__ask" onPointerDown={ripple} onClick={(e) => ask(e, "matematyka", c.key, c.tag)}>
-                  {OFFER_HEAD.levelCta}
-                </button>
-              </article>
-            );
-          })}
+          {cards.length ? (
+            <div className="of__route" style={{ "--n": cards.length } as React.CSSProperties}>
+              <svg className="of__road" viewBox={`0 0 1000 ${ROAD_H}`} preserveAspectRatio="none" aria-hidden="true">
+                <path className="of__road-bed" d={roadPath(cards.length)} />
+                <path className="of__road-line" pathLength={1} d={roadPath(cards.length)} />
+              </svg>
+              <ol className="of__stops">
+              {cards.map((c, i) => {
+                const lvl = levels[i];
+                const price = lessonPrice(lvl, 60);
+                const last = i === cards.length - 1;
+                return (
+                  <li key={c.key} className="of__stop" style={{ "--i": i, "--lift": cards.length - 1 - i } as React.CSSProperties}>
+                    <div className="of__target" style={{ "--t": `${7 + i * 1.7}s` } as React.CSSProperties}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={c.image} alt={c.imageAlt} width={640} height={640} loading="lazy" decoding="async" />
+                      <span className="of__hitring" aria-hidden="true" />
+                      <span className="of__num" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+                      {last ? (
+                        <svg className="of__flag" viewBox="0 0 40 56" aria-hidden="true">
+                          <path className="of__pole" d="M6 54V4" />
+                          <path className="of__cloth" d="M7 5 C 16 1, 24 9, 36 5 L 36 23 C 24 27, 16 19, 7 23 Z" />
+                        </svg>
+                      ) : null}
+                    </div>
+                    <p className="of__tag">{c.tag}</p>
+                    <h3 className="h-card">{c.title}</h3>
+                    <p className="of__for">{c.forWhom}</p>
+                    {c.points.length ? (
+                      <ul className="of__points">
+                        {c.points.map((p) => <li key={p}>{p}</li>)}
+                      </ul>
+                    ) : null}
+                    {price != null ? <p className="of__price">Lekcja 60 min: <b>{zl(price)}</b></p> : null}
+                    <button type="button" className="btn btn--primary of__ask" onPointerDown={ripple} onClick={(e) => ask(e, "matematyka", c.key, c.tag)}>
+                      {OFFER_HEAD.levelCta}
+                    </button>
+                  </li>
+                );
+              })}
+              </ol>
+            </div>
+          ) : (
+            <div className="of__empty">
+              <Mascot mood="think" size={120} side="left" say={OFFER_HEAD.empty} />
+              <button type="button" className="btn btn--primary" onPointerDown={ripple} onClick={(e) => ask(e, "matematyka")}>{OFFER_HEAD.emptyCta}</button>
+            </div>
+          )}
         </div>
 
         <div className="of__panel of__panel--chem" role="group" aria-label="Chemia">

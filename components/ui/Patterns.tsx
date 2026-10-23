@@ -53,19 +53,31 @@ export default function Patterns({ className = "", beam = 240, interactive = tru
     let lastInput = 0;
     let timer = 0;
     /* dryf: losowy cel, losowy czas, losowa pauza — nigdy ta sama pętla */
+    /* W trakcie przewijania światło nie dryfuje: przewijanie ma całą klatkę dla siebie. */
+    let lastScroll = 0;
+    const onScroll = () => { lastScroll = performance.now(); };
+    window.addEventListener("scroll", onScroll, { passive: true });
     const drift = () => {
-      if (visible && performance.now() - lastInput > 2600) {
+      const now = performance.now();
+      if (visible && now - lastInput > 2600 && now - lastScroll > 700) {
         go(gsap.utils.random(w * 0.12, w * 0.9), gsap.utils.random(h * 0.12, h * 0.82), gsap.utils.random(3.2, 6.4), "sine.inOut");
       }
       timer = window.setTimeout(drift, gsap.utils.random(3600, 7800));
     };
     timer = window.setTimeout(drift, 2400);
 
+    /* Ruch myszy: prostokąt czytany raz na klatkę, nie przy każdym zdarzeniu. */
+    let mraf = 0, mx = 0, my = 0;
     const onMove = (e: PointerEvent) => {
       if (!visible || e.pointerType !== "mouse") return;
-      const r = el.getBoundingClientRect();
+      mx = e.clientX; my = e.clientY;
       lastInput = performance.now();
-      go(e.clientX - r.left, e.clientY - r.top, 0.9);
+      if (mraf) return;
+      mraf = requestAnimationFrame(() => {
+        mraf = 0;
+        const r = el.getBoundingClientRect();
+        go(mx - r.left, my - r.top, 0.9);
+      });
     };
     const onTap = (e: PointerEvent) => {
       if (e.pointerType === "mouse") return;
@@ -84,6 +96,8 @@ export default function Patterns({ className = "", beam = 240, interactive = tru
       window.clearTimeout(timer);
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerdown", onTap);
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(mraf);
     };
   }, [beam, interactive]);
 

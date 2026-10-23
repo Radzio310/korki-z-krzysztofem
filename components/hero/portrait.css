@@ -6,19 +6,18 @@
   position: relative; aspect-ratio: 1;
   container-type: inline-size;
   --rise: 106%;
-  --scroll-rise: 0%;
-  will-change: transform;
 }
+.pt--hero .pt__stage { will-change: transform; }
 .pt__photo { position: absolute; inset: 0; z-index: 2; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .pt__img {
   width: 100%; height: 100%; object-fit: contain;
   /* okrąg ∪ prostokąt od dołu o wysokości --rise (miękka krawędź = tafla wody) */
   -webkit-mask-image:
     radial-gradient(var(--r) var(--r) at var(--cx) var(--cy), black 99.2%, transparent 100%),
-    linear-gradient(to top, black calc(var(--rise) + var(--scroll-rise) - 7%), transparent calc(var(--rise) + var(--scroll-rise)));
+    linear-gradient(to top, black calc(var(--rise) - 7%), transparent var(--rise));
   mask-image:
     radial-gradient(var(--r) var(--r) at var(--cx) var(--cy), black 99.2%, transparent 100%),
-    linear-gradient(to top, black calc(var(--rise) + var(--scroll-rise) - 7%), transparent calc(var(--rise) + var(--scroll-rise)));
+    linear-gradient(to top, black calc(var(--rise) - 7%), transparent var(--rise));
   -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
   filter: drop-shadow(var(--drop));
   user-select: none; -webkit-user-drag: none;
@@ -26,7 +25,10 @@
 /* wynurzenie po wejściu (tylko hero) — wyjątek od transform/opacity: przesuwamy krawędź maski */
 .pt--hero .pt__img { animation: pt-rise 1.5s var(--ease-out) .55s both; }
 .pt .pt__img.is-dip { animation: pt-dip 1.15s var(--ease-out) both; }
-@keyframes pt-rise { from { --rise: 80%; } to { --rise: 106%; } }
+/* „O mnie”: przed wejściem głowa pod taflą, po wejściu jedno wynurzenie */
+.pt--about .pt__img.is-under { --rise: 78%; }
+.pt--about .pt__img.is-rise { animation: pt-rise 1.6s var(--ease-out) both; }
+@keyframes pt-rise { from { --rise: 78%; } to { --rise: 106%; } }
 @keyframes pt-dip { 0% { --rise: 106%; } 38% { --rise: 81%; } 100% { --rise: 106%; } }
 
 .pt__custom {
@@ -100,10 +102,11 @@
   .pt__stage { --ok: .8; }
 }
 @media (max-width: 520px) {
-  .pt__stage { --ok: .66; }
+  /* orbita węższa, żeby żadna planeta nie wyszła poza ekran (390 px: skrajna pigułka ≥ 8 px od krawędzi sceny) */
+  .pt__stage { --ok: .5; }
 }
 @media (max-width: 899px) {
-  .pt__planet { font-size: 13px; min-height: 40px; padding-right: 12px; gap: 6px; }
+  .pt__planet { font-size: 12.5px; min-height: 40px; padding: 0 11px 0 5px; gap: 5px; }
   .pt__glyph { width: 28px; height: 28px; font-size: 13px; }
 }
 
@@ -111,7 +114,7 @@
   .pt__ring path { stroke-dashoffset: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .pt__img, .pt--hero .pt__img { animation: none; --rise: 106%; }
+  .pt__img, .pt--hero .pt__img, .pt--about .pt__img.is-under { animation: none; --rise: 106%; }
   .pt__ring path { animation: none; stroke-dashoffset: 0; }
   .pt__curl, .pt__ripple { display: none; }
   .pt__glyph, .pt__planet { animation: none; }

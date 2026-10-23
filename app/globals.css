@@ -136,6 +136,52 @@
 
   --sel: rgba(72, 202, 228, .32);
   color-scheme: dark;
+
+  /* kanały kontaktu — barwy marek (tylko logo kanałów: czat, stopka, pasek) */
+  --brand-on: #FFFFFF;
+  --brand-whatsapp: #25D366;
+  --brand-whatsapp-deep: #128C7E;
+  --brand-messenger: radial-gradient(circle at 18% 100%, #0099FF 0%, #A033FF 60%, #FF5280 90%, #FF7061 100%);
+  --brand-instagram: radial-gradient(circle at 30% 107%, #FDF497 0%, #FDF497 5%, #FD5949 45%, #D6249F 60%, #285AEB 90%);
+  /* bilet na lekcję — papier w obu motywach */
+  --ticket-paper: #FBFAF4;
+  --ticket-ink: var(--ocean-900);
+  --ticket-ink-soft: rgba(3, 4, 94, .58);
+  --ticket-line: rgba(3, 4, 94, .16);
+  --ticket-stamp: var(--sea-600);
+  --ticket-stamp-ok: var(--mint-700);
+  --ticket-stamp-off: var(--coral-500);
+
+  /* Mini-Krzysztof (przewodnik) — barwy wzięte ze zdjęcia; te same w obu motywach */
+  --mk-skin: #F4CBA8;
+  --mk-skin-shade: #E0A983;
+  --mk-blush: #F29A86;
+  --mk-hair: #A97A4E;
+  --mk-hair-hi: #CFA06C;
+  --mk-hair-dark: #7E5534;
+  --mk-coat: #CDA67C;
+  --mk-coat-shade: #AE865D;
+  --mk-coat-hi: #E2C29C;
+  --mk-knit: #1B1D26;
+  --mk-knit-hi: #3A3F52;
+  --mk-glove: #15161C;
+  --mk-mug: #FBF6F1;
+  --mk-mug-shade: #E2D6CE;
+  --mk-mug-dot: #E98DA0;
+  --mk-eye: #23304A;
+  --mk-line: #3B2618;
+  --mk-steam: rgba(255, 255, 255, .8);
+  --mk-shadow: rgba(2, 6, 30, .32);
+
+  /* kartka z zeszytu w kratkę (Korzyści) i karteczka samoprzylepna */
+  --sheet: #0B1850;
+  --sheet-grid: rgba(168, 230, 244, .075);
+  --sheet-margin: rgba(255, 138, 122, .5);
+  --sheet-ink: var(--fg-strong);
+  --sheet-tick: var(--sun-400);
+  --sheet-marker: rgba(255, 209, 102, .2);
+  --note: var(--sun-300);
+  --note-ink: var(--ocean-900);
 }
 
 :root[data-theme="light"] {
@@ -193,6 +239,14 @@
 
   --sel: rgba(2, 62, 138, .18);
   color-scheme: light;
+  --mk-steam: rgba(3, 4, 94, .32);
+  --mk-shadow: rgba(3, 4, 94, .18);
+  --sheet: #FFFFFF;
+  --sheet-grid: rgba(0, 98, 168, .1);
+  --sheet-margin: rgba(242, 84, 106, .55);
+  --sheet-ink: var(--ocean-900);
+  --sheet-tick: #D63D5A;
+  --sheet-marker: rgba(255, 209, 102, .6);
 }
 
 /* ── reset ───────────────────────────────────────────────────────────────── */

@@ -4,10 +4,12 @@ import React from "react";
 import { reducedMotion } from "@/lib/motion";
 import "./kinetic.css";
 
-/* Żywy nagłówek. Litery wpadają na miejsce (CSS — więc działa od pierwszej klatki, bez czekania
-   na JS), a potem „oddychają” pod kursorem: litera najbliżej wskaźnika pogrubia się i zwęża
-   (osie wght/wdth kroju zmiennego). `reveal="view"` = wejście dopiero, gdy nagłówek wjedzie
-   na ekran. Słowa od `accentFrom` dostają kolor akcentu i podkreślenie-orbitę jak w logo.
+/* Żywy nagłówek. Litery wpadają na miejsce (CSS — działa od pierwszej klatki, bez czekania
+   na JS), a potem reagują na kursor: litery najbliżej wskaźnika unoszą się i nabierają barwy
+   akcentu. ZASADA: żadna litera nie zmienia szerokości, wagi ani osi kroju — ruch to wyłącznie
+   `translate`/`rotate` i kolor na pudełku o stałym rozmiarze, więc łamanie wierszy nigdy
+   nie drgnie. `reveal="view"` = wejście dopiero, gdy nagłówek wjedzie na ekran.
+   Słowa od `accentFrom` dostają kolor akcentu i podkreślenie-orbitę jak w logo.
    Czytnik ekranu dostaje całe zdanie przez aria-label. Bez JS tekst jest po prostu widoczny. */
 export default function KineticTitle({
   text, className = "", as: Tag = "h1", reveal = "load", accentFrom, id,
@@ -37,43 +39,47 @@ export default function KineticTitle({
 
     if (reducedMotion() || !matchMedia("(pointer: fine)").matches) return () => io.disconnect();
 
-    let raf = 0;
-    let mx = -9999, my = -9999;
-    let cache: { x: number; y: number }[] = [];
+    /* Środki liter liczone WZGLĘDEM nagłówka — raz (i po zmianie rozmiaru). Przy ruchu myszy
+       czytamy tylko jeden prostokąt nagłówka, nie kilkadziesiąt prostokątów liter. */
+    let offs: { x: number; y: number }[] = [];
+    const last = new Float32Array(chars.length);
     const measure = () => {
-      cache = chars.map((c) => {
+      const h = el.getBoundingClientRect();
+      offs = chars.map((c) => {
         const r = c.getBoundingClientRect();
-        return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+        return { x: r.left - h.left + r.width / 2, y: r.top - h.top + r.height / 2 };
       });
     };
+    let raf = 0;
+    let mx = -9999, my = -9999;
     const loop = () => {
       raf = 0;
-      if (!cache.length) measure();
-      chars.forEach((c, i) => {
-        const d = Math.hypot(mx - cache[i].x, my - cache[i].y);
-        const t = Math.max(0, 1 - d / 240);
-        const ease = t * t * (3 - 2 * t);
-        c.style.setProperty("--w", String(Math.round(700 + ease * 110)));
-        c.style.setProperty("--s", String(Math.round(100 - ease * 20)));
-        c.style.setProperty("--lift", `${(-ease * 7).toFixed(2)}px`);
-      });
+      if (!offs.length) measure();
+      const h = el.getBoundingClientRect();
+      const rx = mx - h.left, ry = my - h.top;
+      for (let i = 0; i < chars.length; i++) {
+        const d = Math.hypot(rx - offs[i].x, ry - offs[i].y);
+        const t = Math.max(0, 1 - d / 220);
+        const k = Math.round(t * t * (3 - 2 * t) * 100) / 100;
+        if (k === last[i]) continue; // dotykamy tylko liter, które naprawdę się zmieniają
+        last[i] = k;
+        chars[i].style.setProperty("--k", String(k));
+      }
     };
     const move = (e: PointerEvent) => {
       if (!visible) return;
       mx = e.clientX; my = e.clientY;
       if (!raf) raf = requestAnimationFrame(loop);
     };
-    const invalidate = () => { cache = []; };
     const leave = () => { mx = my = -9999; if (!raf) raf = requestAnimationFrame(loop); };
+    const ro = new ResizeObserver(() => { offs = []; });
+    ro.observe(el);
     window.addEventListener("pointermove", move, { passive: true });
-    window.addEventListener("scroll", invalidate, { passive: true });
-    window.addEventListener("resize", invalidate);
     document.addEventListener("pointerleave", leave);
     return () => {
       io.disconnect();
+      ro.disconnect();
       window.removeEventListener("pointermove", move);
-      window.removeEventListener("scroll", invalidate);
-      window.removeEventListener("resize", invalidate);
       document.removeEventListener("pointerleave", leave);
       cancelAnimationFrame(raf);
     };
@@ -94,7 +100,7 @@ export default function KineticTitle({
                 const i = n++;
                 return (
                   <span className="kt__m" key={i}>
-                    <span className="kt__c" style={{ "--i": i, "--rot": `${((i * 37) % 31) - 15}deg` } as React.CSSProperties}>{ch}</span>
+                    <span className="kt__c" style={{ "--i": i, "--rot": `${((i * 37) % 31) - 15}deg`, "--tw": `${((i * 53) % 9) - 4}deg` } as React.CSSProperties}>{ch}</span>
                   </span>
                 );
               })}

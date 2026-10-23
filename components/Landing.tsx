@@ -19,9 +19,8 @@ import Reviews from "./sections/Reviews";
 import DailyTask from "./sections/DailyTask";
 import Quiz from "./sections/Quiz";
 import Pricing from "./sections/Pricing";
-import Booking from "./sections/Booking";
 import Faq from "./sections/Faq";
-import Contact from "./sections/Contact";
+import Chat from "./sections/Chat";
 
 const pick = (v: string | null | undefined, fallback: string | null) => (v && v.trim() ? v : fallback);
 
@@ -77,9 +76,8 @@ export default function Landing({ site }: { site: Site | null }) {
         <DailyTask levels={activeLevels} />
         <Quiz levels={activeLevels} />
         <Pricing offer={offer} />
-        <Booking offer={offer} rules={booking} />
         <Faq items={content.faq || []} />
-        <Contact content={{ ...content, faq: [] }} />
+        <Chat offer={offer} rules={booking} />
       </main>
       <Footer />
       <PiDock />

@@ -89,28 +89,32 @@ export default function Portrait({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [planets.length]);
 
-  /* Przewijanie: w hero głowa chowa się przy zjeździe, w „O mnie” wynurza się z dołu. */
+  /* Przewijanie. Hero: przy zjeździe portret odpływa i lekko maleje — sam transform, bez
+     przeliczania maski w każdej klatce. „O mnie”: głowa wynurza się z koła RAZ, gdy portret
+     wjedzie na ekran (maska animuje się 1,5 s, potem stoi — zero kosztu przy przewijaniu). */
   React.useEffect(() => {
     const el = stage.current;
     if (!el || custom || reducedMotion()) return;
-    const { gsap } = ensureGsap();
-    const ctx = gsap.context(() => {
-      /* Wyjątek od zasady transform/opacity: --rise przesuwa krawędź maski — inaczej
-         głowa nie wyjdzie „z wody”. Jeden obraz, koszt to przemalowanie maski. */
-      if (mode === "hero") {
-        gsap.fromTo(el, { "--scroll-rise": "0%" }, {
-          "--scroll-rise": "-24%", ease: "none",
-          scrollTrigger: { trigger: el, start: "center 45%", end: "bottom top", scrub: 0.5 },
-        });
-        gsap.to(el, { yPercent: 10, scale: 0.94, ease: "none", scrollTrigger: { trigger: el, start: "center 45%", end: "bottom top", scrub: 0.5 } });
-      } else {
-        gsap.fromTo(el, { "--scroll-rise": "-26%" }, {
-          "--scroll-rise": "0%", ease: "none",
-          scrollTrigger: { trigger: el, start: "top 85%", end: "center 55%", scrub: 0.6 },
-        });
-      }
-    }, el);
-    return () => ctx.revert();
+    if (mode === "hero") {
+      if (!matchMedia("(min-width: 900px)").matches) return;
+      const { gsap } = ensureGsap();
+      const ctx = gsap.context(() => {
+        gsap.to(el, { yPercent: 8, scale: 0.94, ease: "none", scrollTrigger: { trigger: el, start: "center 45%", end: "bottom top", scrub: true } });
+      }, el);
+      return () => ctx.revert();
+    }
+    const im = img.current;
+    if (!im) return;
+    im.classList.add("is-under");
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return;
+      io.disconnect();
+      im.classList.remove("is-under");
+      im.classList.add("is-rise");
+      setDip((d) => d + 1);
+    }, { rootMargin: "0px 0px -22% 0px" });
+    io.observe(el);
+    return () => io.disconnect();
   }, [mode, custom]);
 
   /* Para nad kubkiem: każda smużka startuje w swoim losowym rytmie. */

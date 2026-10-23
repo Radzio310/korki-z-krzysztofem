@@ -3,8 +3,8 @@
 import React from "react";
 import type { TimelineStep } from "@/lib/types";
 import KineticTitle from "../hero/KineticTitle";
-import Chalkboard, { BOARD_LINES } from "../hero/Chalkboard";
-import Mascot, { type MascotMood } from "../Mascot";
+import Chalkboard, { BOARD_LINES, Guide } from "../hero/Chalkboard";
+import type { MascotMood } from "../Mascot";
 import { STEPS } from "@/content/site";
 import { ensureGsap, getLenis, reducedMotion } from "@/lib/motion";
 import "./timeline.css";
@@ -37,6 +37,7 @@ export default function Timeline({ steps: custom }: { steps: TimelineStep[] }) {
       lines.forEach((l) => l.style.setProperty("--w", "1"));
       bd.querySelectorAll(".board__root").forEach((c) => { c.setAttribute("r", "5"); (c as SVGElement).style.opacity = "1"; });
       bd.querySelectorAll<SVGPathElement>(".board__axis, .board__parab, .board__circle path").forEach((p) => { p.style.strokeDashoffset = "0"; });
+      bd.querySelectorAll<SVGElement>(".board__lbl").forEach((t) => { t.style.opacity = "1"; });
       bd.classList.add("is-solved");
     };
     if (reducedMotion()) {
@@ -53,6 +54,8 @@ export default function Timeline({ steps: custom }: { steps: TimelineStep[] }) {
       gsap.set(lines, { "--w": 0 });
       gsap.set(bd.querySelectorAll(".board__axis, .board__parab, .board__circle path"), { strokeDashoffset: 1 });
       gsap.set(bd.querySelectorAll(".board__root"), { attr: { r: 0 }, opacity: 0 });
+      const lbls = bd.querySelectorAll(".board__lbl");
+      gsap.set(lbls, { opacity: 0 });
       const tl = gsap.timeline({ defaults: { ease: "none" } });
       tl.to(lines[0], { "--w": 1, duration: 1.2 }, 0)
         .to(bd.querySelector(".board__axis"), { strokeDashoffset: 0, duration: 0.6 }, 1.6)
@@ -60,8 +63,10 @@ export default function Timeline({ steps: custom }: { steps: TimelineStep[] }) {
         .to(bd.querySelector(".board__parab"), { strokeDashoffset: 0, duration: 1 }, 2.6)
         .to(lines[2], { "--w": 1, duration: 0.8 }, 4)
         .to(bd.querySelector(".board__root--a"), { attr: { r: 5 }, opacity: 1, duration: 0.25, ease: "back.out(2)" }, 4.6)
+        .to(lbls[0], { opacity: 1, duration: 0.25 }, 4.6)
         .to(lines[3], { "--w": 1, duration: 0.8 }, 4.8)
         .to(bd.querySelector(".board__root--b"), { attr: { r: 5 }, opacity: 1, duration: 0.25, ease: "back.out(2)" }, 5.4)
+        .to(lbls[1], { opacity: 1, duration: 0.25 }, 5.4)
         .to(lines[4], { "--w": 1, duration: 0.5 }, 5.6)
         .to(bd.querySelector(".board__circle path"), { strokeDashoffset: 0, duration: 0.4 }, 6);
       return tl;
@@ -146,11 +151,11 @@ export default function Timeline({ steps: custom }: { steps: TimelineStep[] }) {
 
         <div className="tl__boardwrap">
           <Chalkboard boardRef={board} />
-          <Mascot className="tl__pi" mood={say.mood} say={say.say} size={112} side="left" />
+          <Guide className="tl__guide" mood={say.mood} say={say.say} size={92} />
         </div>
       </div>
       <p className="sr-only">
-        Na tablicy: {BOARD_LINES.map((l) => l.text).join("; ")}; odpowiedź x należy do zbioru 2 i 3.
+        Na tablicy: {BOARD_LINES.map((l) => l.text).join("; ")}; odpowiedź: x = 2 lub x = 3.
       </p>
     </section>
   );

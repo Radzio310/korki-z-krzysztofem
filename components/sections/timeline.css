@@ -48,15 +48,16 @@
 .tl__step.is-active .tl__txt span { opacity: 1; color: var(--fg-body); }
 .tl__note { font-size: 14px; }
 
-.tl__boardwrap { position: relative; perspective: 1400px; }
-.tl__pi { position: absolute; left: -112px; bottom: -24px; z-index: 4; }
-.tl__pi .pi__bubble { left: 74%; right: auto; min-width: 230px; }
+/* tablica + przewodnik pod nią (w przepływie — nic nie zasłania tablicy) */
+.tl__boardwrap { position: relative; display: grid; gap: 14px; justify-items: stretch; }
+.tl__guide { padding-left: 6px; }
 .tl .h-section { font-size: clamp(34px, 4vw, 60px); }
+/* przypięta scena musi zmieścić się w oknie: szerokość tablicy liczona z wysokości ekranu */
+.tl--pinned .tl__boardwrap .board { width: min(100%, calc((100svh - var(--nav-h) - 230px) * 16 / 11)); justify-self: center; }
 
 @media (max-width: 899px) {
   .tl__grid { grid-template-columns: 1fr; }
-  .tl__boardwrap { order: -1; margin-bottom: 56px; }
+  .tl__boardwrap { order: -1; margin-bottom: 24px; }
   .tl__copy { order: 0; }
-  .tl__pi { left: -6px; bottom: -48px; }
-  .tl__pi .pi__bubble { font-size: 13px; min-width: 190px; }
+  .tl__guide .guide__say { font-size: 13.5px; }
 }

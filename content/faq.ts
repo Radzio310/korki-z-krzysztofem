@@ -39,6 +39,6 @@ export const FAQ: FaqItem[] = [
   {
     id: "faq-kontakt",
     q: "Jak najszybciej się skontaktować?",
-    a: `Zadzwoń lub napisz na WhatsAppie: ${CONTACT.phoneDisplay}. Możesz też wysłać formularz na dole strony.`,
+    a: `Zadzwoń lub napisz na WhatsAppie: ${CONTACT.phoneDisplay}. Możesz też napisać w czacie na dole strony.`,
   },
 ];

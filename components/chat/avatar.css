@@ -1,0 +1,14 @@
+/* Avatar: kadr na twarz z portretu. Pierscien „pisze...” krazy tylko transformem. */
+.kav { position: relative; display: inline-grid; flex: none; width: var(--kav); height: var(--kav); border-radius: 50%; }
+.kav__face {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: url("/images/krzysztof-640.webp") 48% 7% / 380% auto no-repeat, var(--sea-soft);
+  box-shadow: inset 0 0 0 1.5px var(--border-strong);
+}
+.kav::after {
+  content: ""; position: absolute; inset: -3px; border-radius: 50%;
+  border: 2px solid transparent; border-top-color: var(--accent); border-right-color: var(--accent);
+  opacity: 0; transition: opacity var(--dur-2);
+}
+.kav.is-typing::after { opacity: 1; animation: kk-spin 1.1s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .kav.is-typing::after { animation: none; } }
