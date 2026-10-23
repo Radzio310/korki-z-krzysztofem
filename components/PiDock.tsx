@@ -39,7 +39,7 @@ const ACTIONS = [
 ];
 
 /* Elementy, których dymek nie może przykryć. */
-const SOLID = "p, h1, h2, h3, h4, li, dt, dd, blockquote, figure, img, picture, canvas, video, input, textarea, select, label, button, a, table, [role='radio'], [role='tab'], .board, .board__canvas, .card, [data-dock-avoid]";
+const SOLID = "p, h1, h2, h3, h4, li, dt, dd, blockquote, figure, img, picture, canvas, video, input, textarea, select, label, button, a, table, [role='radio'], [role='tab'], .board, .board__canvas, .slate, .slate__frame, .slate__surface, .kc__window, .fqc, .card, [data-dock-avoid]";
 
 function bubbleIsSafe(dock: HTMLElement, bubble: HTMLElement) {
   const r = bubble.getBoundingClientRect();

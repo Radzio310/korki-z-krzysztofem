@@ -115,6 +115,7 @@
 .of__chemtitle { font-size: clamp(30px, 4vw, 56px); }
 .of__chem .of__tag { color: var(--accent-2); }
 .of__chem .btn--primary { background: var(--accent-2); color: var(--accent-2-ink); animation: none; align-self: auto; }
+.of__chem .btn--primary::before { display: none; }
 
 .mol { position: relative; width: 100%; max-width: 360px; justify-self: center; aspect-ratio: 1; border-radius: 50%; }
 .mol svg { width: 100%; height: 100%; overflow: visible; }

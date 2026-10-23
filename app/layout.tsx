@@ -12,7 +12,7 @@ const TITLE = "Korepetycje matematyka i chemia Mysłowice | Korki z Krzysztofem"
 const DESCRIPTION =
   "Matematyka i chemia z Krzysztofem Witkowiczem. Korepetycje w Mysłowicach i online, dopasowane do poziomu ucznia. Poznaj ofertę i zapytaj o zajęcia.";
 /* Indeksacja tylko na produkcji Vercela; podglądy i lokalne uruchomienia dostają noindex. */
-const INDEXABLE = process.env.VERCEL_ENV === "production";
+const INDEXABLE = process.env.VERCEL_ENV === "production" && process.env.KORKI_NOINDEX !== "1";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),

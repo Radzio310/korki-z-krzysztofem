@@ -40,6 +40,9 @@ export default function Marquee({ items }: { items: string[] }) {
     const io = new IntersectionObserver(([e]) => {
       onScreen = e.isIntersecting;
       tweens.forEach((t) => (onScreen ? t.resume() : t.pause()));
+      /* will-change tylko, gdy taśma jest w ekranie: pochylenie pasa z prędkości przewijania
+         idzie wtedy na warstwie kompozytora, a nie przemalowuje wielkiego napisu w każdej klatce */
+      lanesEl.forEach((l) => { l.style.willChange = onScreen ? "transform" : "auto"; });
     });
     io.observe(el);
     const settle = () => {

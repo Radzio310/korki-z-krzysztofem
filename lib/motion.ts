@@ -9,6 +9,9 @@ let registered = false;
 export function ensureGsap() {
   if (!registered && typeof window !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
+    /* Pasek adresu na telefonie zmienia wysokość okna w trakcie przewijania — bez tego każda
+       taka zmiana przeliczałaby wszystkie sceny (refresh = odczyt układu całej strony). */
+    ScrollTrigger.config({ ignoreMobileResize: true });
     registered = true;
   }
   return { gsap, ScrollTrigger };

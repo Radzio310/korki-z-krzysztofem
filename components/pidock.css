@@ -69,6 +69,11 @@
 /* przy przewijaniu postać zjeżdża za krawędź; jeśli w spoczynku leżałaby na treści — zostaje języczek */
 .dock.is-visible.is-moving:not(.is-open) .dock__mk,
 .dock.is-visible.is-tab .dock__mk { transform: translateX(140%) rotate(10deg); opacity: 0; pointer-events: none; transition: transform 420ms var(--ease-out), opacity 260ms var(--ease-out); }
+/* Postać w doku to SVG: jej animacje (oddech, para, kropki) chodzą na głównym wątku i przemalowują
+   całe SVG w każdej klatce. Gdy dok jest niewidoczny (przed pierwszym ekranem, w trakcie
+   przewijania, w trybie języczka) — stoją; po zatrzymaniu przewijania ruszają od miejsca. */
+.dock:not(.is-visible) .dock__mk *, .dock:not(.is-visible) .dock__mk *::before, .dock:not(.is-visible) .dock__mk *::after,
+.dock.is-moving:not(.is-open) .dock__mk *, .dock.is-tab:not(.is-open) .dock__mk * { animation-play-state: paused !important; }
 .dock__tab {
   position: absolute; right: calc(-1 * max(14px, env(safe-area-inset-right))); bottom: 22px;
   width: 28px; height: 56px;

@@ -5,6 +5,7 @@ import type { Content, Site } from "@/lib/types";
 import { DEFAULT_BOOKING, EMPTY_CONTENT, EMPTY_OFFER } from "@/lib/types";
 import { CONTACT, DEFAULT_LEVELS, SUBJECTS, TOPICS } from "@/content";
 import SmoothScroll from "./SmoothScroll";
+import AnimGate from "./AnimGate";
 import Nav from "./Nav";
 import Cursor from "./Cursor";
 import PiDock from "./PiDock";
@@ -62,6 +63,7 @@ export default function Landing({ site }: { site: Site | null }) {
       <a className="skip" href="#main">Przejdź do treści</a>
       <noscript dangerouslySetInnerHTML={{ __html: NOSCRIPT }} />
       <SmoothScroll />
+      <AnimGate />
       <Cursor />
       <div className="grain" aria-hidden="true" />
       <Nav />

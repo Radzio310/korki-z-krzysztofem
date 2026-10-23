@@ -33,6 +33,7 @@ export default function Timeline({ steps: custom }: { steps: TimelineStep[] }) {
     const bd = board.current;
     if (!el || !bd) return;
     const lines = Array.from(bd.querySelectorAll<HTMLElement>(".board__line"));
+    const rail = el.querySelector<HTMLElement>(".tl__rail");
     const all = () => {
       lines.forEach((l) => l.style.setProperty("--w", "1"));
       bd.querySelectorAll(".board__root").forEach((c) => { c.setAttribute("r", "5"); (c as SVGElement).style.opacity = "1"; });
@@ -89,7 +90,9 @@ export default function Timeline({ steps: custom }: { steps: TimelineStep[] }) {
           trigger: el, start: "top top", end: "+=170%", pin: true, scrub: 0.6, anticipatePin: 1,
           onUpdate: (self) => {
             setActive(stepAt(self.progress));
-            el.style.setProperty("--tl-p", self.progress.toFixed(3));
+            /* zmienna na samej szynie, nie na korzeniu sekcji: dziedziczona własność zmieniana w każdej
+               klatce przypięcia unieważniałaby style całego poddrzewa (tablica, kroki, napisy) */
+            rail?.style.setProperty("--tl-p", self.progress.toFixed(3));
             bd.classList.toggle("is-solved", self.progress > 0.96);
           },
         },
