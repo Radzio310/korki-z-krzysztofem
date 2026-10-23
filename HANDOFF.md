@@ -13,7 +13,7 @@ Poprzedni handoff z chmury jest w historii gita (commit 98121fe). Decyzje właś
 ## Otwarte
 1. `KORKI_NOTIFY_EMAIL` (skrzynka Krzysztofa) — brak adresu, ustawić na Railway.
 2. Dostępność terminów w panelu → Dostępność (Krzysztof); bez niej czat oferuje tylko zapytanie.
-3. ~~Test dostawy maila~~ — zrobiony 23.10: rezerwacja testowa (id 1, odwołana) → „Rezerwacja przyjęta” i „Odwołanie lekcji przyjęte” w skrzynce odbiorczej Gmaila w ~30 s, link prowadzi na stronę Vercela. Nadawca to adres Communio (`communio@catchapp.com.pl`); własny adres nadawcy dla Korków = osobna decyzja.
+3. ~~Test dostawy maila~~ — zrobiony 23.10: rezerwacja testowa (id 1, odwołana) → „Rezerwacja przyjęta” i „Odwołanie lekcji przyjęte” w skrzynce odbiorczej Gmaila w ~30 s, link prowadzi na stronę Vercela. Od 23.10 nadawca `korki@catchapp.com.pl` (Railway `KORKI_FROM_EMAIL`, serwer bdf1c6d) — sprawdzone rezerwacją testową id 2 (odwołana), oba maile w skrzynce odbiorczej.
 4. Przełączenie domeny (instrukcja §14): Vercel → Domains, rekordy WWW w Hostingerze bez ruszania MX/SPF/DKIM; potem usunąć `KORKI_NOINDEX`, zmienić `KORKI_SITE_URL` na `https://korkizkrzysztofem.pl`.
 5. Płynność na słabym sprzęcie: przy CPU 4× ~25–32 kl./s; dalszy zysk = mniej warstw kompozytora.
 6. Lighthouse i a11y (instrukcja §13/§17) — nie mierzone.
