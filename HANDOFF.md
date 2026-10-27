@@ -10,6 +10,8 @@ Poprzedni handoff z chmury jest w historii gita (commit 98121fe). Decyzje właś
 - **Produkcja:** 9 opinii z grafik (migracja), zestaw startowy quizu (12) i zadań dnia (16).
 - **Materiały:** `_materialy\` (instrukcja, grafiki, zip, `opinie-z-grafik.json` — dosłowna transkrypcja). Wyłączone z gita przez `.git/info/exclude`.
 
+- **Panel od nowa** (e584db7, decyzje: pamięć `korki-panel-decyzje`): logowanie dzielone z logo WK, „Dziś” + rozkład, cennik jak dokument z autozapisem i podglądem `/panel/podglad`, malowanie dostępności (telefon: dzień po dniu), zadania i quiz jako spis treści. Wdrożone na Vercel.
+
 ## Otwarte
 1. `KORKI_NOTIFY_EMAIL` (skrzynka Krzysztofa) — brak adresu, ustawić na Railway.
 2. Dostępność terminów w panelu → Dostępność (Krzysztof); bez niej czat oferuje tylko zapytanie.
