@@ -2,98 +2,276 @@
 
 import React from "react";
 import { EMPTY_CONTENT, type Content } from "@/lib/types";
-import { Empty, Field, SaveBar, useSettingsDoc } from "../ui";
+import { ABOUT, FAQ, HERO, STEPS } from "@/content";
+import { usePanelApi } from "../ui";
+import { Blank, Grip, Ink, LoadError, PreviewPane, SaveLine, Skel, SureButton, moveItem, useAutosave, useReorder } from "./kit";
+import "./content.css";
 
-type ListKey = "about_facts" | "faq" | "timeline";
+/* Treści strony jako dokument w kolejności strony: nagłówek, kroki, o mnie, pytania, kontakt.
+   Puste pole = tekst domyślny (widać go szarym w polu). Autozapis z Cofnij, obok żywy podgląd. */
+
+const URL_OK = /^(https?:\/\/|\/)\S+$/;
+const MAIL_OK = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+function normalize(c: Content): Content {
+  return {
+    ...EMPTY_CONTENT,
+    ...c,
+    contact: { ...EMPTY_CONTENT.contact, ...(c.contact || {}) },
+    about_facts: c.about_facts || [],
+    faq: c.faq || [],
+    timeline: c.timeline || [],
+  };
+}
+
+/* Na serwer: bez niedokończonych pozycji list i bez błędnych adresów (wtedy zostaje ostatni dobry). */
+function cleanContent(c: Content, saved: Content | null): Content {
+  const prev = saved ? normalize(saved) : EMPTY_CONTENT;
+  const url = (v: string | null, old: string | null) => (!v || !v.trim() ? null : URL_OK.test(v.trim()) ? v.trim() : old);
+  const n = normalize(c);
+  return {
+    ...n,
+    photo_url: url(n.photo_url, prev.photo_url),
+    contact: {
+      ...n.contact,
+      email: !n.contact.email?.trim() ? null : MAIL_OK.test(n.contact.email.trim()) ? n.contact.email.trim() : prev.contact.email,
+      facebook: url(n.contact.facebook, prev.contact.facebook),
+      instagram: url(n.contact.instagram, prev.contact.instagram),
+    },
+    about_facts: n.about_facts.filter((f) => f.value.trim() && f.label.trim()),
+    faq: n.faq.filter((f) => f.q.trim() && f.a.trim()),
+    timeline: n.timeline.filter((t) => t.title.trim() && t.body.trim()),
+  };
+}
+
+type FieldDef<T> = { k: keyof T & string; label: string; placeholder: string; max: number; multiline?: boolean; cls: string };
+
+/* Lista w dokumencie: numer, pola w miejscu, przeciąganie, usuwanie w dwóch krokach. */
+function Items<T extends Record<string, string>>({ list, onChange, fields, blank, addLabel, limit, name, numbered = true, missing }: {
+  list: T[]; onChange: (l: T[]) => void; fields: FieldDef<T>[]; blank: T; addLabel: string; limit: number; name: (t: T, i: number) => string; numbered?: boolean; missing: string;
+}) {
+  const [fresh, setFresh] = React.useState<number | null>(null);
+  const { listRef, handle } = useReorder((from, to) => onChange(moveItem(list, from, to)));
+  const upd = (i: number, k: keyof T, v: string) => onChange(list.map((x, j) => (j === i ? { ...x, [k]: v } : x)));
+  return (
+    <div className="ct-items">
+      <div ref={listRef} className="ct-list">
+        {list.map((item, i) => {
+          const partial = fields.some((f) => !item[f.k]?.trim()) && fields.some((f) => item[f.k]?.trim());
+          return (
+            <div key={i} data-row="" className="ct-item">
+              <button type="button" className="ed-grip" {...handle(i, name(item, i))}><Grip /></button>
+              {numbered ? <span className="ct-item__n" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span> : null}
+              <div className="ct-item__f">
+                {fields.map((f, fi) => (
+                  <Ink
+                    key={f.k}
+                    className={f.cls}
+                    value={item[f.k] || ""}
+                    multiline={f.multiline}
+                    label={`${f.label} ${i + 1}`}
+                    placeholder={f.placeholder}
+                    maxLength={f.max}
+                    autoFocus={fresh === i && fi === 0}
+                    onBlur={() => setFresh(null)}
+                    onChange={(v) => upd(i, f.k, v)}
+                  />
+                ))}
+                {partial ? <p className="ct-miss">{missing}</p> : null}
+              </div>
+              <SureButton className="ct-item__x" aria={name(item, i)} onConfirm={() => onChange(list.filter((_, j) => j !== i))} />
+            </div>
+          );
+        })}
+      </div>
+      {list.length < limit ? (
+        <button type="button" className="ed-tb ed-tb--accent" onClick={() => { onChange([...list, { ...blank }]); setFresh(list.length); }}>{addLabel}</button>
+      ) : <p className="ed-note">To już maksimum ({limit}).</p>}
+    </div>
+  );
+}
+
+function Photo({ url }: { url: string }) {
+  const [state, setState] = React.useState<"load" | "ok" | "bad">("load");
+  React.useEffect(() => setState("load"), [url]);
+  if (!URL_OK.test(url.trim())) return <p className="ct-miss">Adres musi zaczynać się od https:// — do tego czasu zostaje poprzednie zdjęcie.</p>;
+  return (
+    <figure className={`ct-photo is-${state}`}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={url} alt="Podgląd zdjęcia" onLoad={() => setState("ok")} onError={() => setState("bad")} />
+      <figcaption>{state === "bad" ? "Nie mogę wczytać zdjęcia z tego adresu — sprawdź, czy link jest publiczny." : state === "load" ? "Wczytuję zdjęcie…" : "Tak wejdzie w koło portretu."}</figcaption>
+    </figure>
+  );
+}
 
 export default function ContentView() {
-  const { draft, setDraft, loading, dirty, busy, save, reset } = useSettingsDoc<Content>("content");
-  if (loading && !draft) return <div className="pn-card is-skel" style={{ height: 420 }} />;
-  if (!draft) return <Empty title="Nie udało się wczytać treści" body="Odśwież stronę za chwilę." />;
+  const call = usePanelApi();
+  const doc = useAutosave<Content>({
+    load: async () => {
+      const d = await call<{ value: Content; version: number }>("/korki/panel/settings/content", { quiet: true });
+      return { value: normalize(d.value), version: d.version };
+    },
+    save: async (value, version) => {
+      const d = await call<{ value: Content; version: number }>("/korki/panel/settings/content", { method: "PUT", body: { value, version }, quiet: true });
+      return { value: normalize(d.value), version: d.version };
+    },
+    clean: cleanContent,
+    conflict: "Ktoś zmienił treści w innym oknie — pokazuję najnowszą wersję.",
+  });
+  const [focus, setFocus] = React.useState("top");
+  const c = doc.draft;
+  const payload = React.useMemo(() => ({ view: "content" as const, content: c ? cleanContent(c, null) : undefined, focus }), [c, focus]);
 
-  const c = { ...draft, contact: { ...EMPTY_CONTENT.contact, ...(draft.contact || {}) }, about_facts: draft.about_facts || [], faq: draft.faq || [], timeline: draft.timeline || [] };
-  const set = (patch: Partial<Content>) => setDraft({ ...c, ...patch });
-  const txt = (k: keyof Content) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => set({ [k]: e.target.value || null } as Partial<Content>);
-  const contact = (k: keyof Content["contact"]) => (e: React.ChangeEvent<HTMLInputElement>) => set({ contact: { ...c.contact, [k]: e.target.value.trim() || null } });
+  if (doc.loading && !c) return <div className="pn-page ed ct"><Skel rows={10} /></div>;
+  if (!c) return <div className="pn-page ed ct"><LoadError what="treści strony" msg={doc.failed} onRetry={doc.reload} /></div>;
 
-  function listEditor<T extends Record<string, string>>(key: ListKey, fields: { k: keyof T; label: string; area?: boolean; max: number }[], blank: T, addLabel: string, limit = 12) {
-    const list = c[key] as unknown as T[];
-    const upd = (i: number, k: keyof T, v: string) => set({ [key]: list.map((x, j) => (j === i ? { ...x, [k]: v } : x)) } as Partial<Content>);
-    return (
-      <div className="pn-items">
-        {list.map((item, i) => (
-          <div key={i} className="pn-item">
-            <span className="pn-item__n">{i + 1}</span>
-            <div className="pn-item__fields">
-              {fields.map((f) => (
-                <Field key={String(f.k)} label={f.label} wide={f.area}>
-                  {f.area
-                    ? <textarea className="input" value={item[f.k] || ""} maxLength={f.max} onChange={(e) => upd(i, f.k, e.target.value)} />
-                    : <input className="input" value={item[f.k] || ""} maxLength={f.max} onChange={(e) => upd(i, f.k, e.target.value)} />}
-                </Field>
-              ))}
-            </div>
-            <div className="pn-item__tools">
-              <button type="button" onClick={() => { if (i === 0) return; const n = [...list]; [n[i - 1], n[i]] = [n[i], n[i - 1]]; set({ [key]: n } as Partial<Content>); }} disabled={i === 0} aria-label="W górę">↑</button>
-              <button type="button" className="pn-x" onClick={() => set({ [key]: list.filter((_, j) => j !== i) } as Partial<Content>)} aria-label="Usuń">×</button>
-            </div>
-          </div>
-        ))}
-        {list.length < limit ? <button type="button" className="pn-add" onClick={() => set({ [key]: [...list, { ...blank }] } as Partial<Content>)}>{addLabel}</button> : null}
-      </div>
-    );
-  }
+  const set = (patch: Partial<Content>) => doc.set((d) => ({ ...d, ...patch }));
+  const txt = (k: "hero_title" | "hero_subtitle" | "about_title" | "about_body" | "photo_url") => (v: string) => set({ [k]: v || null } as Partial<Content>);
+  const contact = (k: keyof Content["contact"]) => (v: string) => doc.set((d) => ({ ...d, contact: { ...d.contact, [k]: v || null } }));
+  const badMail = !!c.contact.email?.trim() && !MAIL_OK.test(c.contact.email.trim());
+  const badUrl = (v: string | null) => !!v?.trim() && !URL_OK.test(v.trim());
 
   return (
-    <div className="pn-stack">
-      <section className="pn-card">
-        <header className="pn-card__head"><h2>Nagłówek strony</h2><span className="muted">Puste pola = tekst domyślny.</span></header>
-        <div className="pn-pad pn-form">
-          <Field label="Tytuł" hint="Domyślnie: „Korki z Krzysztofem”. Litery tańczą pod kursorem — krótszy tytuł działa lepiej."><input className="input" value={c.hero_title || ""} onChange={txt("hero_title")} maxLength={60} /></Field>
-          <Field label="Podtytuł" hint="Domyślnie: „Matematyka, która…” z obracającym się słowem."><input className="input" value={c.hero_subtitle || ""} onChange={txt("hero_subtitle")} maxLength={160} /></Field>
-        </div>
-      </section>
+    <div className="pn-page ed ct">
+      <div className="ed-split">
+        <article className="ed-doc" aria-label="Treści strony">
+          <header className="ed-doc__head">
+            <div>
+              <p className="ed-kicker">Strona w kolejności · edytujesz w miejscu</p>
+              <p className="ed-doc__lede">Puste pole = tekst domyślny (widać go szarym).</p>
+            </div>
+            <SaveLine state={doc.state} canUndo={doc.canUndo} onUndo={doc.undo} onRetry={doc.retry} onRestore={doc.restoreMine} />
+          </header>
 
-      <section className="pn-card">
-        <header className="pn-card__head"><h2>O mnie</h2></header>
-        <div className="pn-pad pn-form">
-          <Field label="Tytuł sekcji" hint="Domyślnie: „Cześć, jestem Krzysztof.”"><input className="input" value={c.about_title || ""} onChange={txt("about_title")} maxLength={80} /></Field>
-          <Field label="Kilka zdań o sobie" wide><textarea className="input" value={c.about_body || ""} onChange={txt("about_body")} maxLength={1500} rows={5} placeholder="Doświadczenie, podejście, z czym pomagasz najczęściej." /></Field>
-          <Field label="Adres zdjęcia (URL)" hint="Link do zdjęcia (np. z Dysku Google udostępnionego publicznie albo z innego hostingu). Bez zdjęcia pokazuje się animowany monogram.">
-            <input className="input" value={c.photo_url || ""} onChange={txt("photo_url")} maxLength={500} placeholder="https://…" inputMode="url" />
-          </Field>
-          {c.photo_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img className="pn-photo" src={c.photo_url} alt="Podgląd zdjęcia" />
-          ) : null}
-          <h3 className="pn-sub">Liczby w liczniku</h3>
-          <p className="pn-hint">np. „8 lat” — „uczę matematyki”, „120+” — „uczniów”. Liczba dolicza się animacją. Tylko prawdziwe dane.</p>
-          {listEditor<{ value: string; label: string }>("about_facts", [{ k: "value", label: "Wartość", max: 16 }, { k: "label", label: "Podpis", max: 60 }], { value: "", label: "" }, "+ liczba", 4)}
-        </div>
-      </section>
+          <section className="ed-sec" onFocusCapture={() => setFocus("top")} aria-labelledby="ct-hero">
+            <div className="ed-sec__head"><p className="ed-kicker" id="ct-hero">01 · Nagłówek strony</p></div>
+            <Ink className="ct-hero" multiline value={c.hero_title || ""} onChange={txt("hero_title")} label="Tytuł strony" placeholder={HERO.title} maxLength={200} />
+            <Ink className="ct-lead" multiline value={c.hero_subtitle || ""} onChange={txt("hero_subtitle")} label="Tekst pod tytułem" placeholder={HERO.lead} maxLength={400} />
+            <p className="ed-note">Litery tytułu reagują na kursor — krótszy tytuł działa lepiej.</p>
+          </section>
 
-      <section className="pn-card">
-        <header className="pn-card__head"><h2>Kontakt</h2></header>
-        <div className="pn-pad pn-grid3">
-          <Field label="E-mail"><input className="input" type="email" value={c.contact.email || ""} onChange={contact("email")} maxLength={120} /></Field>
-          <Field label="Telefon"><input className="input" value={c.contact.phone || ""} onChange={contact("phone")} maxLength={30} /></Field>
-          <Field label="Miasto"><input className="input" value={c.contact.city || ""} onChange={contact("city")} maxLength={60} /></Field>
-          <Field label="Okolica / dzielnice"><input className="input" value={c.contact.area || ""} onChange={contact("area")} maxLength={120} /></Field>
-          <Field label="Facebook (URL)"><input className="input" value={c.contact.facebook || ""} onChange={contact("facebook")} maxLength={300} /></Field>
-          <Field label="Instagram (URL)"><input className="input" value={c.contact.instagram || ""} onChange={contact("instagram")} maxLength={300} /></Field>
-        </div>
-      </section>
+          <section className="ed-sec" onFocusCapture={() => setFocus("#jak-pracuje")} aria-labelledby="ct-steps">
+            <div className="ed-sec__head"><p className="ed-kicker" id="ct-steps">02 · Jak pracuję — kroki</p></div>
+            {c.timeline.length === 0 ? (
+              <Blank
+                art="page"
+                title="Na stronie są kroki domyślne"
+                body={`Strona pokazuje ${STEPS.length} kroki: ${STEPS.map((s) => `„${s.title}”`).join(", ")}. Wstaw je, żeby poprawić słowa, albo napisz własne.`}
+                onArt={() => set({ timeline: STEPS.map((s) => ({ ...s })) })}
+              >
+                <button type="button" className="ed-btn" onClick={() => set({ timeline: STEPS.map((s) => ({ ...s })) })}>Wstaw kroki ze strony</button>
+                <button type="button" className="ed-tb ed-tb--accent" onClick={() => set({ timeline: [{ title: "", body: "" }] })}>Napisz od zera</button>
+              </Blank>
+            ) : (
+              <Items<{ title: string; body: string }>
+                list={c.timeline}
+                onChange={(timeline) => set({ timeline })}
+                fields={[
+                  { k: "title", label: "Tytuł kroku", placeholder: "Tytuł kroku", max: 80, cls: "ct-t" },
+                  { k: "body", label: "Opis kroku", placeholder: "Co się dzieje w tym kroku", max: 500, multiline: true, cls: "ct-b" },
+                ]}
+                blank={{ title: "", body: "" }}
+                addLabel="+ krok"
+                limit={8}
+                name={(t, i) => t.title || `krok ${i + 1}`}
+                missing="Dopisz tytuł i opis — do tego czasu kroku nie ma na stronie."
+              />
+            )}
+          </section>
 
-      <section className="pn-card">
-        <header className="pn-card__head"><h2>Jak to działa — kroki</h2><span className="muted">Puste = 5 kroków domyślnych.</span></header>
-        <div className="pn-pad">{listEditor<{ title: string; body: string }>("timeline", [{ k: "title", label: "Tytuł", max: 60 }, { k: "body", label: "Opis", area: true, max: 300 }], { title: "", body: "" }, "+ krok", 8)}</div>
-      </section>
+          <section className="ed-sec" onFocusCapture={() => setFocus("#o-mnie")} aria-labelledby="ct-about">
+            <div className="ed-sec__head"><p className="ed-kicker" id="ct-about">03 · O mnie</p></div>
+            <Ink className="ct-h2" multiline value={c.about_title || ""} onChange={txt("about_title")} label="Tytuł sekcji O mnie" placeholder={ABOUT.title} maxLength={120} />
+            <Ink className="ct-body" multiline value={c.about_body || ""} onChange={txt("about_body")} label="Tekst o sobie" placeholder={ABOUT.body.replace(/[{}]/g, "")} maxLength={4000} />
+            <p className="ed-note">Własny tekst zastępuje domyślny opis razem z „równaniem” (spokojnie + w praktyce + indywidualnie).</p>
 
-      <section className="pn-card">
-        <header className="pn-card__head"><h2>Częste pytania</h2></header>
-        <div className="pn-pad">{listEditor<{ q: string; a: string }>("faq", [{ k: "q", label: "Pytanie", max: 160 }, { k: "a", label: "Odpowiedź", area: true, max: 1200 }], { q: "", a: "" }, "+ pytanie", 16)}</div>
-      </section>
-      <SaveBar dirty={dirty} busy={busy} onSave={save} onReset={reset} />
+            <div className="ct-row">
+              <span className="ct-row__k">Zdjęcie</span>
+              <div className="ct-row__v">
+                <Ink value={c.photo_url || ""} onChange={txt("photo_url")} label="Adres zdjęcia" placeholder="https://… (bez zdjęcia: animowany monogram)" maxLength={500} inputMode="url" invalid={badUrl(c.photo_url)} />
+                {c.photo_url?.trim() ? <Photo url={c.photo_url.trim()} /> : <p className="ed-note">Link do zdjęcia, np. z Dysku Google udostępnionego publicznie.</p>}
+              </div>
+            </div>
+
+            <div className="ct-row">
+              <span className="ct-row__k">Liczby</span>
+              <div className="ct-row__v">
+                {c.about_facts.length === 0 ? <p className="ed-mute">Bez liczb sekcja ich nie pokazuje. Tylko prawdziwe dane — np. „8 lat” · „uczę matematyki”.</p> : null}
+                <Items<{ value: string; label: string }>
+                  list={c.about_facts}
+                  onChange={(about_facts) => set({ about_facts })}
+                  fields={[
+                    { k: "value", label: "Liczba", placeholder: "120+", max: 40, cls: "ct-fact" },
+                    { k: "label", label: "Podpis liczby", placeholder: "uczniów", max: 80, cls: "ct-fact-l" },
+                  ]}
+                  blank={{ value: "", label: "" }}
+                  addLabel="+ liczba"
+                  limit={4}
+                  numbered={false}
+                  name={(f, i) => f.value || `liczba ${i + 1}`}
+                  missing="Liczba i podpis razem — inaczej nie trafi na stronę."
+                />
+              </div>
+            </div>
+          </section>
+
+          <section className="ed-sec" onFocusCapture={() => setFocus("#faq")} aria-labelledby="ct-faq">
+            <div className="ed-sec__head"><p className="ed-kicker" id="ct-faq">04 · Częste pytania</p></div>
+            {c.faq.length === 0 ? (
+              <Blank
+                art="page"
+                title="Na stronie są pytania domyślne"
+                body={`Strona pokazuje ${FAQ.length} pytań o przedmioty, poziomy i formę zajęć. Wstaw je, żeby poprawić, albo zacznij od własnych — własna lista zastępuje domyślną w całości.`}
+                onArt={() => set({ faq: FAQ.map(({ q, a }) => ({ q, a })) })}
+              >
+                <button type="button" className="ed-btn" onClick={() => set({ faq: FAQ.map(({ q, a }) => ({ q, a })) })}>Wstaw pytania ze strony</button>
+                <button type="button" className="ed-tb ed-tb--accent" onClick={() => set({ faq: [{ q: "", a: "" }] })}>Napisz od zera</button>
+              </Blank>
+            ) : (
+              <Items<{ q: string; a: string }>
+                list={c.faq}
+                onChange={(faq) => set({ faq })}
+                fields={[
+                  { k: "q", label: "Pytanie", placeholder: "Pytanie", max: 200, cls: "ct-q" },
+                  { k: "a", label: "Odpowiedź", placeholder: "Odpowiedź", max: 2000, multiline: true, cls: "ct-a" },
+                ]}
+                blank={{ q: "", a: "" }}
+                addLabel="+ pytanie"
+                limit={20}
+                name={(f, i) => f.q || `pytanie ${i + 1}`}
+                missing="Dopisz odpowiedź — do tego czasu pytania nie ma na stronie."
+              />
+            )}
+          </section>
+
+          <section className="ed-sec" aria-labelledby="ct-contact">
+            <div className="ed-sec__head">
+              <p className="ed-kicker" id="ct-contact">05 · Kontakt</p>
+              <span className="ed-note">E-mail trafia do opisu strony dla wyszukiwarek.</span>
+            </div>
+            <dl className="ct-dl">
+              {([
+                ["email", "E-mail", "adres@…", 120, badMail, "Ten adres nie wygląda na e-mail — zostaje poprzedni."],
+                ["phone", "Telefon", "+48 882 418 481", 40, false, ""],
+                ["city", "Miasto", "Mysłowice", 120, false, ""],
+                ["area", "Okolica", "i online", 200, false, ""],
+                ["facebook", "Facebook", "https://facebook.com/…", 500, badUrl(c.contact.facebook), "Adres musi zaczynać się od https://"],
+                ["instagram", "Instagram", "https://instagram.com/…", 500, badUrl(c.contact.instagram), "Adres musi zaczynać się od https://"],
+              ] as const).map(([k, label, ph, max, bad, why]) => (
+                <div key={k}>
+                  <dt>{label}</dt>
+                  <dd>
+                    <Ink value={c.contact[k] || ""} onChange={contact(k)} label={label} placeholder={ph} maxLength={max} invalid={bad} inputMode={k === "email" ? "email" : k === "phone" ? "tel" : undefined} />
+                    {bad ? <p className="ct-miss">{why}</p> : null}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        </article>
+
+        <PreviewPane payload={payload} />
+      </div>
     </div>
   );
 }

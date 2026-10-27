@@ -1,11 +1,4 @@
-.pn-msg__tags { display: flex; flex-wrap: wrap; gap: 6px; }
-.pn-msg__tags > span {
-  display: inline-flex; align-items: center; min-height: 28px; padding: 0 12px; border-radius: var(--r-pill);
-  font-size: 13px; font-weight: 700; color: var(--fg-strong);
-  background: color-mix(in oklab, var(--accent) 14%, transparent);
-  border: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);
-}
-.pn-msg__tags > span.is-plain { background: transparent; border-color: var(--border-strong); color: var(--fg-mid); }
-.pn-msg__links { display: flex; flex-wrap: wrap; gap: 6px 14px; }
-.pn-msg__links a { color: var(--accent); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
-.pn-msg__none { font-style: italic; }
+/* Wiadomości — kontakt pod listem: tekstowe odnośniki, bez pigułek. */
+.pn-letter__contact { display: flex; flex-wrap: wrap; align-items: center; gap: 0 20px; }
+.pn-letter__contact a { min-height: 40px; display: inline-flex; align-items: center; font-weight: 650; font-size: 14.5px; color: var(--pn-accent); font-variant-numeric: tabular-nums; }
+.pn-letter__contact a:hover { text-decoration: underline; text-underline-offset: 4px; }
