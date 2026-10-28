@@ -1,0 +1,121 @@
+/* Portret w kole („bulaj”) — wspólny dla hero i „O mnie”. Nic nad sceną nie ma overflow: hidden:
+   głowa, orbita i planety wychodzą poza okrąg. */
+.pt { position: relative; width: 100%; }
+.pt__stage {
+  --ok: 1; /* ściśnięcie orbity w poziomie (telefon) */
+  position: relative; aspect-ratio: 1;
+  container-type: inline-size;
+  --rise: 106%;
+}
+.pt--hero .pt__stage { will-change: transform; }
+.pt__photo { position: absolute; inset: 0; z-index: 2; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.pt__img {
+  width: 100%; height: 100%; object-fit: contain;
+  /* okrąg ∪ prostokąt od dołu o wysokości --rise (miękka krawędź = tafla wody) */
+  -webkit-mask-image:
+    radial-gradient(var(--r) var(--r) at var(--cx) var(--cy), black 99.2%, transparent 100%),
+    linear-gradient(to top, black calc(var(--rise) - 7%), transparent var(--rise));
+  mask-image:
+    radial-gradient(var(--r) var(--r) at var(--cx) var(--cy), black 99.2%, transparent 100%),
+    linear-gradient(to top, black calc(var(--rise) - 7%), transparent var(--rise));
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  filter: drop-shadow(var(--drop));
+  user-select: none; -webkit-user-drag: none;
+}
+/* wynurzenie po wejściu (tylko hero) — wyjątek od transform/opacity: przesuwamy krawędź maski */
+.pt--hero .pt__img { animation: pt-rise 1.5s var(--ease-out) .55s both; }
+.pt .pt__img.is-dip { animation: pt-dip 1.15s var(--ease-out) both; }
+/* „O mnie”: przed wejściem głowa pod taflą, po wejściu jedno wynurzenie */
+.pt--about .pt__img.is-under { --rise: 78%; }
+.pt--about .pt__img.is-rise { animation: pt-rise 1.6s var(--ease-out) both; }
+@keyframes pt-rise { from { --rise: 78%; } to { --rise: 106%; } }
+@keyframes pt-dip { 0% { --rise: 106%; } 38% { --rise: 81%; } 100% { --rise: 106%; } }
+
+.pt__custom {
+  position: absolute;
+  left: calc(var(--cx) - var(--r)); top: calc(var(--cy) - var(--r));
+  width: calc(var(--r) * 2); height: calc(var(--r) * 2);
+  object-fit: cover; border-radius: 50%;
+  border: 3px solid var(--accent);
+}
+
+.pt__fx { position: absolute; inset: 0; z-index: 3; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.pt__ripple { fill: none; stroke: var(--sea-200); stroke-width: .35; opacity: 0; transform-box: fill-box; transform-origin: center; }
+.pt__ripples.is-on .pt__ripple { animation: pt-ripple 1.6s var(--ease-out) both; }
+.pt--hero .pt__ripples.is-on .pt__ripple--1 { animation-delay: 1.35s; }
+.pt--hero .pt__ripples.is-on .pt__ripple--2 { animation-delay: 1.65s; }
+.pt__ripples.is-on .pt__ripple--2 { animation-delay: .3s; }
+.pt .pt__ripples.is-on.is-tap .pt__ripple--1 { animation-delay: .25s; }
+.pt .pt__ripples.is-on.is-tap .pt__ripple--2 { animation-delay: .5s; }
+@keyframes pt-ripple { 0% { opacity: .9; transform: scale(.35); } 100% { opacity: 0; transform: scale(2.4); } }
+
+.pt__curl { fill: none; stroke: var(--sea-50); stroke-width: .45; stroke-linecap: round; opacity: 0; transform-box: fill-box; transform-origin: 50% 100%; }
+.pt__curl.is-on { animation: pt-steam 3.4s var(--ease-out) forwards; }
+@keyframes pt-steam {
+  0% { opacity: 0; transform: translateY(6%) scaleY(.55); }
+  28% { opacity: .75; }
+  100% { opacity: 0; transform: translate(4%, -38%) scaleY(1.15); }
+}
+
+/* orbita jak w logo — tylna połowa za portretem, przednia przed nim */
+.pt__ring { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; transform: scaleX(var(--ok)); }
+.pt__ring--back { z-index: 1; opacity: .5; }
+.pt__ring--front { z-index: 3; opacity: .8; }
+.pt__ring path {
+  fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1; stroke-dashoffset: 1;
+  /* rysowanie orbity = stroke-dashoffset (atrybut SVG), jednorazowo */
+  animation: pt-draw 1.6s var(--ease-out) forwards;
+}
+.pt__ring--back path { animation-delay: .9s; }
+.pt__ring--front path { animation-delay: 1.2s; }
+@keyframes pt-draw { to { stroke-dashoffset: 0; } }
+
+.pt__planet {
+  position: absolute; left: 0; top: 0;
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 44px; padding: 0 16px 0 6px;
+  border-radius: var(--r-pill);
+  background: var(--glass-strong);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-1);
+  font: 700 14px/1 var(--font-body); color: var(--fg-strong); white-space: nowrap;
+  transform: translate(calc((50 + (var(--px) - 50) * var(--ok)) * 1cqw), calc(var(--py) * 1cqw)) translate(-50%, -50%) scale(calc(.84 + var(--depth) * .16));
+  opacity: calc(.62 + (var(--depth) + 1) * .19);
+  transition: background var(--dur-2), border-color var(--dur-2), color var(--dur-2);
+  animation: pt-pop .7s var(--ease-spring) both;
+  animation-delay: calc(1.3s + var(--bob) * .08);
+}
+.pt__planet:hover, .pt__planet:focus-visible { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+.pt__glyph {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: grid; place-items: center;
+  font: 700 15px/1 var(--font-display); color: var(--accent-ink);
+  background: var(--accent);
+  animation: pt-bob var(--bob) ease-in-out infinite alternate;
+}
+.pt__planet:hover .pt__glyph, .pt__planet:focus-visible .pt__glyph { background: var(--accent-ink); color: var(--accent); }
+@keyframes pt-pop { from { opacity: 0; } }
+@keyframes pt-bob { from { transform: translateY(-2px) rotate(-6deg); } to { transform: translateY(2px) rotate(6deg); } }
+
+@media (max-width: 899px) {
+  .pt__stage { --ok: .8; }
+}
+@media (max-width: 520px) {
+  /* orbita węższa, żeby żadna planeta nie wyszła poza ekran (390 px: skrajna pigułka ≥ 8 px od krawędzi sceny) */
+  .pt__stage { --ok: .5; }
+}
+@media (max-width: 899px) {
+  .pt__planet { font-size: 12.5px; min-height: 40px; padding: 0 11px 0 5px; gap: 5px; }
+  .pt__glyph { width: 28px; height: 28px; font-size: 13px; }
+}
+
+@media (scripting: none) {
+  .pt__ring path { stroke-dashoffset: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pt__img, .pt--hero .pt__img, .pt--about .pt__img.is-under { animation: none; --rise: 106%; }
+  .pt__ring path { animation: none; stroke-dashoffset: 0; }
+  .pt__curl, .pt__ripple { display: none; }
+  .pt__glyph, .pt__planet { animation: none; }
+}

@@ -9,6 +9,9 @@ let registered = false;
 export function ensureGsap() {
   if (!registered && typeof window !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
+    /* Pasek adresu na telefonie zmienia wysokość okna w trakcie przewijania — bez tego każda
+       taka zmiana przeliczałaby wszystkie sceny (refresh = odczyt układu całej strony). */
+    ScrollTrigger.config({ ignoreMobileResize: true });
     registered = true;
   }
   return { gsap, ScrollTrigger };
@@ -99,7 +102,11 @@ export function useMagnet<T extends HTMLElement>(strength = 0.28) {
 }
 
 /* Kanał zdarzeń między sekcjami: quiz → kalkulator → rezerwacja przekazują sobie wybór. */
-export type Handoff = { level_key?: string; duration?: number; weekly?: number; source?: string };
+export type Handoff = {
+  level_key?: string; subject_key?: string; duration?: number; weekly?: number; source?: string;
+  /** "contact" = formularz „Zapytaj o zajęcia” (bez kasowania wpisanej wiadomości); brak = rezerwacja */
+  target?: "contact" | "booking";
+};
 const HANDOFF = "kk:handoff";
 export function emitHandoff(detail: Handoff) {
   window.dispatchEvent(new CustomEvent<Handoff>(HANDOFF, { detail }));

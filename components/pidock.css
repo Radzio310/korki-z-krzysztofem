@@ -1,26 +1,107 @@
-.dock { position: fixed; right: max(14px, env(safe-area-inset-right)); bottom: max(14px, env(safe-area-inset-bottom)); z-index: 60; display: grid; justify-items: end; gap: 10px; pointer-events: none; }
-.dock__pi { pointer-events: auto; border-radius: 50%; transform: translateY(140%) scale(.6); opacity: 0; transition: transform 700ms var(--ease-spring), opacity 400ms; }
-.dock.is-visible .dock__pi { transform: none; opacity: 1; }
-.dock__pi:hover .pi__svg { transform: scale(1.06) rotate(-4deg); }
-.dock__pi .pi__svg { transition: transform var(--dur-3) var(--ease-spring); }
-.dock__pi .pi__bubble { min-width: 210px; right: 70%; text-align: left; }
-.dock__menu { display: grid; gap: 8px; justify-items: end; }
-.dock__menu button {
+/* Dok Mini-Krzysztofa. Ruch: transform/opacity. Dymek nad postacią, w marginesie strony. */
+.dock {
+  --mk-h: 92px;
+  position: fixed; right: max(14px, env(safe-area-inset-right)); bottom: max(10px, env(safe-area-inset-bottom));
+  z-index: 60;
+  display: grid; justify-items: end; gap: 10px;
   pointer-events: none;
+}
+.dock__mk {
+  position: relative;
+  pointer-events: auto; border-radius: 28px;
+  transform: translateY(130%) scale(.7); opacity: 0;
+  transition: transform 700ms var(--ease-spring), opacity 400ms var(--ease-out);
+}
+.dock.is-visible .dock__mk { transform: none; opacity: 1; }
+.dock__mk .pi__svg { transition: transform var(--dur-3) var(--ease-spring); transform-origin: 50% 100%; }
+.dock__mk:hover .pi__svg { transform: translateY(-3px) rotate(-3deg); }
+.dock__mk:focus-visible { outline-offset: 4px; }
+
+/* kropka „mam podpowiedź” — gdy dymek nie zmieścił się bez zasłaniania treści */
+.dock__badge {
+  position: absolute; right: 6px; top: 8px;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--gold); box-shadow: 0 0 0 3px var(--bg);
+  animation: dock-badge 2.4s var(--ease-out) infinite;
+}
+@keyframes dock-badge { 0%, 100% { transform: scale(1); } 12% { transform: scale(1.3); } 24% { transform: scale(1); } }
+
+.dock__bubble {
+  position: absolute; right: 4px; bottom: calc(var(--mk-h) + 6px);
+  width: max-content; max-width: 210px;
+  padding: 11px 14px;
+  border-radius: 18px 18px 6px 18px;
+  background: var(--glass-strong); border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-1);
+  font: 650 14px/1.38 var(--font-body); color: var(--fg-strong);
+  text-align: left;
+  pointer-events: none;
+  visibility: hidden; opacity: 0; transform: translateY(8px) scale(.94); transform-origin: 90% 100%;
+}
+.dock__bubble.is-on { visibility: visible; opacity: 1; transform: none; transition: opacity 260ms var(--ease-out), transform 520ms var(--ease-spring); }
+
+.dock__menu { display: grid; gap: 8px; justify-items: end; }
+.dock__menu button, .dock__hint {
+  pointer-events: none;
+  opacity: 0; transform: translateY(16px) scale(.86);
+  transition: opacity 240ms var(--ease-out), transform 460ms var(--ease-spring), border-color var(--dur-2);
+  transition-delay: calc((4 - var(--i)) * 24ms);
+}
+.dock__menu button {
   display: inline-flex; align-items: center; gap: 10px;
-  min-height: 46px; padding: 0 18px;
+  min-height: 46px; padding: 0 18px 0 14px;
   border-radius: var(--r-pill);
   background: var(--glass-strong); border: 1px solid var(--border-strong);
   backdrop-filter: blur(16px);
   box-shadow: var(--shadow-1);
   font-weight: 700; color: var(--fg-strong);
-  opacity: 0; transform: translateY(20px) scale(.8);
-  transition: opacity 260ms var(--ease-out), transform 460ms var(--ease-spring), border-color var(--dur-2);
-  transition-delay: calc((3 - var(--i)) * 30ms);
 }
-.dock.is-open .dock__menu button { pointer-events: auto; opacity: 1; transform: none; transition-delay: calc((3 - var(--i)) * 45ms); }
+.dock__menu button svg { color: var(--accent); flex: none; }
+.dock__hint {
+  max-width: 240px; margin: 0 0 4px; padding: 10px 14px;
+  border-radius: 16px 16px 6px 16px;
+  background: var(--accent); color: var(--accent-ink);
+  font: 700 14px/1.35 var(--font-body);
+}
+.dock.is-open .dock__menu button, .dock.is-open .dock__hint { pointer-events: auto; opacity: 1; transform: none; transition-delay: calc((4 - var(--i)) * 40ms); }
 .dock__menu button:hover { border-color: var(--accent); }
-@media (max-width: 640px) {
-  .dock__pi .pi { --size: 60px !important; }
-  .dock__pi .pi__bubble { display: none; }
+
+/* przy przewijaniu postać zjeżdża za krawędź; jeśli w spoczynku leżałaby na treści — zostaje języczek */
+.dock.is-visible.is-moving:not(.is-open) .dock__mk,
+.dock.is-visible.is-tab .dock__mk { transform: translateX(140%) rotate(10deg); opacity: 0; pointer-events: none; transition: transform 420ms var(--ease-out), opacity 260ms var(--ease-out); }
+/* Postać w doku to SVG: jej animacje (oddech, para, kropki) chodzą na głównym wątku i przemalowują
+   całe SVG w każdej klatce. Gdy dok jest niewidoczny (przed pierwszym ekranem, w trakcie
+   przewijania, w trybie języczka) — stoją; po zatrzymaniu przewijania ruszają od miejsca. */
+.dock:not(.is-visible) .dock__mk *, .dock:not(.is-visible) .dock__mk *::before, .dock:not(.is-visible) .dock__mk *::after,
+.dock.is-moving:not(.is-open) .dock__mk *, .dock.is-tab:not(.is-open) .dock__mk * { animation-play-state: paused !important; }
+.dock__tab {
+  position: absolute; right: calc(-1 * max(14px, env(safe-area-inset-right))); bottom: 22px;
+  width: 28px; height: 56px;
+  pointer-events: none; opacity: 0; transform: translateX(100%);
+  transition: transform 460ms var(--ease-spring), opacity var(--dur-2);
+}
+.dock__tab span {
+  position: absolute; right: 0; top: 6px; bottom: 6px; width: 14px;
+  border-radius: 12px 0 0 12px;
+  background: var(--glass-strong); border: 1px solid var(--border-strong); border-right: 0;
+  box-shadow: var(--shadow-1);
+}
+.dock__tab span::after { content: ""; position: absolute; left: 4px; top: 50%; width: 6px; height: 6px; margin-top: -3px; border-radius: 50%; background: var(--gold); }
+.dock.is-visible.is-tab:not(.is-moving) .dock__tab { opacity: 1; transform: none; pointer-events: auto; }
+
+@media (max-width: 719px) {
+  .dock__tab { right: 0; }
+  /* Telefon: postać wygląda zza prawej krawędzi (widać głowę i kubek), więc prawie nie
+     przykrywa tekstu; stuknięcie wysuwa ją całą i otwiera skróty. */
+  .dock { --mk-h: 60px; right: 0; }
+  .dock__mk .pi { --size: 54px !important; }
+  .dock.is-visible .dock__mk { transform: translateX(34%) rotate(-8deg); }
+  .dock.is-visible.is-open .dock__mk { transform: translateX(-8px); }
+  .dock__menu { padding-right: 10px; }
+  .dock__badge { width: 12px; height: 12px; right: auto; left: 2px; top: 4px; }
+  /* nad paskiem „Zapytaj o zajęcia”, żeby się nie nakładali */
+  body:has(.mcta:not(.is-hidden)) .dock { bottom: calc(76px + env(safe-area-inset-bottom)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dock__badge { animation: none; }
 }

@@ -1,13 +1,15 @@
 "use client";
 
 import React from "react";
-import Logo from "./Logo";
 import Mascot from "./Mascot";
+import Patterns from "./ui/Patterns";
+import Channels from "./ui/Channels";
+import { CONTACT, IMAGES, NAV_LINKS } from "@/content/site";
 import { scrollToTarget } from "@/lib/motion";
 import "./footer.css";
 
-/* Stopka: fala, która żyje, wielki napis, który wynurza się przy dojściu do dna,
-   i Pi machający na pożegnanie. Kliknięcie w falę puszcza po niej kręgi. */
+/* Stopka: żywe fale (klik = kręgi na wodzie), wzory pod latarką, kontakt bez szukania
+   i wielki napis, który wraca na górę. */
 export default function Footer() {
   const [rings, setRings] = React.useState<{ id: number; x: number; y: number }[]>([]);
   const year = new Date().getFullYear();
@@ -30,28 +32,38 @@ export default function Footer() {
         {rings.map((r) => <span key={r.id} className="ft__ring" style={{ left: r.x, top: r.y }} />)}
       </div>
       <div className="ft__body">
-        <div className="wrap">
+        <Patterns className="ft__pat" beam={180} />
+        <div className="wrap ft__wrap">
           <div className="ft__top">
             <div className="ft__brand">
-              <Logo size={44} />
-              <p className="muted">Korepetycje, które mają sens. Krok po kroku, bez stresu.</p>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={IMAGES.logo.src} alt="" width={64} height={64} className="ft__logo" />
+              <p><b>Korki z Krzysztofem</b><br />Korepetycje z matematyki i chemii.<br />{CONTACT.city} {CONTACT.area}.</p>
             </div>
+
             <nav className="ft__links" aria-label="Stopka">
-              <a href="#o-mnie">O mnie</a>
-              <a href="#quiz">Quiz poziomu</a>
-              <a href="#cennik">Cennik</a>
-              <a href="#rezerwacja">Rezerwacja</a>
+              {NAV_LINKS.map((l) => <a key={l.id} href={`#${l.id}`}>{l.label}</a>)}
               <a href="#kontakt">Kontakt</a>
               <a href="/polityka-prywatnosci">Polityka prywatności</a>
             </nav>
+
+            <div className="ft__contact">
+              <a className="ft__phone" href={CONTACT.phoneHref}>
+                <small>Telefon</small>
+                {CONTACT.phoneDisplay}
+              </a>
+              <Channels variant="footer" className="ft__social" />
+            </div>
+
             <Mascot mood="wave" size={110} say="Do zobaczenia na lekcji!" side="right" className="ft__pi" />
           </div>
+
           <button type="button" className="ft__giant" onClick={() => scrollToTarget("#top", 0)} aria-label="Wróć na górę">
             <span>Korki</span> <em>z</em> <span>Krzysztofem</span>
           </button>
           <div className="ft__bottom">
-            <span>© {year} Korki z Krzysztofem</span>
-            <span className="muted">Krok po kroku, aż do celu.</span>
+            <span>© {year} Korki z Krzysztofem · Krzysztof Witkowicz</span>
+            <span>Krok po kroku.</span>
           </div>
         </div>
       </div>
