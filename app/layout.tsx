@@ -7,27 +7,30 @@ import "@fontsource/caveat/latin-500.css";
 import "@fontsource/caveat/latin-700.css";
 import "./globals.css";
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://korkizkrzysztofem.pl";
-const TITLE = "Korki z Krzysztofem — korepetycje, które mają sens";
+const SITE = (process.env.NEXT_PUBLIC_SITE_URL || "https://korkizkrzysztofem.pl").replace(/\/$/, "");
+const TITLE = "Korepetycje matematyka i chemia Mysłowice | Korki z Krzysztofem";
 const DESCRIPTION =
-  "Korepetycje z Krzysztofem: sprawdź poziom w 60 sekund, policz cenę pakietu i zarezerwuj termin online — z potwierdzeniem na maila.";
+  "Matematyka i chemia z Krzysztofem Witkowiczem. Korepetycje w Mysłowicach i online, dopasowane do poziomu ucznia. Poznaj ofertę i zapytaj o zajęcia.";
+/* Indeksacja tylko na produkcji Vercela; podglądy i lokalne uruchomienia dostają noindex. */
+const INDEXABLE = process.env.VERCEL_ENV === "production" && process.env.KORKI_NOINDEX !== "1";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
   title: { default: TITLE, template: "%s · Korki z Krzysztofem" },
   description: DESCRIPTION,
-  keywords: ["korepetycje", "korki", "matematyka", "matura", "matura rozszerzona", "liceum", "szkoła podstawowa", "Korki z Krzysztofem"],
-  alternates: { canonical: "/" },
+  keywords: ["korepetycje Mysłowice", "korepetycje matematyka", "korepetycje chemia", "korepetycje online", "Korki z Krzysztofem"],
+  authors: [{ name: "Krzysztof Witkowicz" }],
+  alternates: { canonical: `${SITE}/` },
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
-    url: SITE,
+    url: `${SITE}/`,
     siteName: "Korki z Krzysztofem",
     locale: "pl_PL",
     type: "website",
   },
   twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
-  robots: { index: true, follow: true },
+  robots: INDEXABLE ? { index: true, follow: true } : { index: false, follow: false },
 };
 
 export const viewport: Viewport = {

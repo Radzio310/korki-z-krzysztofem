@@ -1,39 +1,48 @@
 /* ==========================================================================
    Korki z Krzysztofem — tokeny i baza
-   „Morska głębia”: granat otchłani, turkus fali, złoto kredy. Jasny motyw to
-   piana morska i biała tablica (marker zamiast kredy). Kolory, odstępy i ruch
-   tylko z tokenów — komponenty nie znają żadnego hexa.
+   „Granat i morze”: paleta starej strony (granat #03045E, królewski #023E8A,
+   lazur #0096C7, szałwiowa mięta #83C5BE, piana #EDF6F9, krem #EDF4E0)
+   rozpisana na pełną skalę. Ciemny motyw = nocne morze, jasny = papier i atrament.
+   Kolory, odstępy i ruch tylko z tokenów — komponenty nie znają żadnego hexa.
    ========================================================================== */
 
 @property --p { syntax: "<number>"; inherits: false; initial-value: 0; }
 @property --glow-x { syntax: "<percentage>"; inherits: false; initial-value: 50%; }
 @property --glow-y { syntax: "<percentage>"; inherits: false; initial-value: 50%; }
 @property --angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@property --rise { syntax: "<percentage>"; inherits: true; initial-value: 100%; }
 
 :root {
-  /* paleta morska */
-  --sea-50:  #ECFEFF;
-  --sea-100: #CFFAFE;
-  --sea-200: #A5F3FC;
-  --sea-300: #7BE7F0;
-  --sea-400: #2FD3E0;
-  --sea-500: #12A8C4;
-  --sea-600: #0B7FA6;
-  --sea-700: #0A5C86;
-  --ocean-800: #083A5E;
-  --ocean-900: #06243F;
-  --ocean-950: #031426;
-  --abyss: #020B16;
-  --sun-300: #FFE29A;
-  --sun-400: #FFC857;
-  --sun-500: #F2A93B;
+  /* skala morska — rdzeń z palety starej strony */
+  --sea-50:  #EDF6F9;  /* piana (stary tekst) */
+  --sea-100: #D4F3FA;
+  --sea-200: #A8E6F4;
+  --sea-300: #6FD3EE;
+  --sea-400: #2BB8E0;
+  --sea-500: #0096C7;  /* lazur (stary secondary) */
+  --sea-600: #0062A8;
+  --sea-700: #023E8A;  /* królewski (stary primary) */
+  --ocean-800: #0A1A72;
+  --ocean-900: #03045E; /* granat (stary) */
+  --ocean-950: #030733;
+  --abyss: #01021A;
+  --mint-200: #CBE8E4;
+  --mint-400: #83C5BE; /* szałwiowa mięta (stary accent) */
+  --mint-700: #2F6E68;
+  --cream: #EDF4E0;    /* krem (stare jasne tło pól) */
+  --sun-300: #FFE6A3;
+  --sun-400: #FFD166;
+  --sun-500: #E9A83A;
   --coral-400: #FF8A7A;
-  --coral-500: #FF5E6C;
-  --kelp-400: #4BE3A6;
+  --coral-500: #F2546A;
+  --kelp-400: #7FD6C2;
+  --paper: #FFFFFF;
+  --paper-ink: #0B0B1A;
 
-  --sea-metallic: linear-gradient(120deg, #E0FDFF 0%, #7BE7F0 18%, #2FD3E0 38%, #0B7FA6 58%, #2FD3E0 78%, #C9FBFF 100%);
-  --sea-soft: linear-gradient(135deg, #7BE7F0 0%, #12A8C4 55%, #0A5C86 100%);
-  --sun-metallic: linear-gradient(120deg, #FFF3CF 0%, #FFC857 40%, #F2A93B 70%, #FFE29A 100%);
+  --sea-metallic: linear-gradient(120deg, #EDF6F9 0%, #A8E6F4 22%, #6FD3EE 45%, #2BB8E0 62%, #A8E6F4 82%, #EDF6F9 100%);
+  --sea-soft: linear-gradient(135deg, #A8E6F4 0%, #2BB8E0 50%, #0062A8 100%);
+  --sun-metallic: linear-gradient(120deg, #FFF3CF 0%, #FFD166 40%, #E9A83A 70%, #FFE6A3 100%);
+  --royal: linear-gradient(120deg, #023E8A 0%, #0062A8 45%, #03045E 100%);
 
   /* ruch */
   --ease-spring: cubic-bezier(.22, 1.18, .36, 1);
@@ -52,8 +61,8 @@
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   /* układ */
-  --gutter: clamp(16px, 4vw, 44px);
-  --max: 1220px;
+  --gutter: clamp(20px, 4vw, 44px);
+  --max: 1180px;
   --nav-h: 72px;
   --r-sm: 12px;
   --r-md: 18px;
@@ -62,87 +71,182 @@
   --r-pill: 999px;
   --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 64px; --s-9: 96px; --s-10: 140px;
 
-  /* ciemny (domyślny) */
+  /* ciemny (domyślny) — nocne morze */
   --bg: var(--ocean-950);
   --bg-deep: var(--abyss);
-  --bg-elev: #0A2440;
-  --bg-elev-2: #0E2D4E;
-  --fg: #EAF7FB;
+  --bg-elev: #0A1350;
+  --bg-elev-2: #0F1B63;
+  --fg: var(--sea-50);
   --fg-strong: #FFFFFF;
-  --fg-body: rgba(234, 247, 251, .84);
-  --fg-mid: rgba(234, 247, 251, .68);
-  --fg-subtle: rgba(234, 247, 251, .48);
-  --accent: var(--sea-400);
-  --accent-strong: var(--sea-300);
-  --accent-deep: var(--sea-600);
-  --accent-ink: var(--ocean-950);
-  --accent-glow: rgba(47, 211, 224, .42);
+  --fg-body: rgba(237, 246, 249, .86);
+  --fg-mid: rgba(237, 246, 249, .72);
+  --fg-subtle: rgba(237, 246, 249, .5);
+  --accent: var(--sea-300);
+  --accent-strong: var(--sea-200);
+  --accent-deep: var(--sea-500);
+  --accent-ink: var(--ocean-900);
+  --accent-glow: rgba(72, 202, 228, .42);
+  --accent-2: var(--mint-400);       /* chemia, potwierdzenia */
+  --accent-2-ink: var(--ocean-900);
   --gold: var(--sun-400);
   --danger: var(--coral-500);
   --success: var(--kelp-400);
-  --border: rgba(165, 243, 252, .12);
-  --border-strong: rgba(165, 243, 252, .24);
-  --divider: rgba(165, 243, 252, .08);
-  --glass: rgba(14, 45, 78, .48);
-  --glass-strong: rgba(6, 30, 54, .82);
-  --glass-hi: rgba(255, 255, 255, .08);
-  --input-bg: rgba(255, 255, 255, .04);
-  --shadow-1: 0 10px 24px -10px rgba(0, 0, 0, .6);
-  --shadow-2: 0 30px 60px -24px rgba(0, 6, 16, .8);
-  --shadow-glow: 0 18px 44px -14px rgba(47, 211, 224, .55), 0 4px 14px rgba(47, 211, 224, .22);
+  --border: rgba(168, 230, 244, .13);
+  --border-strong: rgba(168, 230, 244, .26);
+  --divider: rgba(168, 230, 244, .08);
+  --glass: rgba(10, 22, 96, .5);
+  --glass-strong: rgba(4, 9, 52, .84);
+  --glass-hi: rgba(255, 255, 255, .07);
+  --input-bg: rgba(255, 255, 255, .045);
+  --scrim: rgba(1, 2, 26, .62);
+  --btn-primary: var(--sea-metallic);
+  --shadow-1: 0 10px 24px -10px rgba(0, 0, 10, .6);
+  --shadow-2: 0 30px 60px -24px rgba(0, 0, 16, .82);
+  --shadow-glow: 0 18px 44px -14px rgba(72, 202, 228, .55), 0 4px 14px rgba(72, 202, 228, .2);
+  --drop: 0 30px 40px rgba(0, 0, 20, .38);
 
-  /* tablica: ciemna = kreda na morskiej łupkowej, jasna = marker na białej */
-  --board: #0C2E3B;
-  --board-edge: #5A3B22;
-  --board-edge-hi: #8C6239;
+  /* powierzchnia „głęboka” (stopka, pasy) — ten sam granat w obu motywach, tekst zawsze jasny */
+  --deep: var(--ocean-900);
+  --deep-2: var(--abyss);
+  --on-deep: var(--sea-50);
+  --on-deep-mid: rgba(237, 246, 249, .74);
+  --on-deep-line: rgba(168, 230, 244, .18);
+  --deep-pattern-dim: rgba(168, 230, 244, .06);
+  --deep-pattern-lit: rgba(168, 230, 244, .45);
+  --deep-beam: rgba(72, 202, 228, .14);
+
+  /* wzory w tle: przygaszone i podświetlone latarką */
+  --pattern-dim: rgba(168, 230, 244, .045);
+  --pattern-lit: rgba(168, 230, 244, .42);
+  --beam: rgba(72, 202, 228, .16);
+
+  /* tablica: ciemna = kreda na granatowej, jasna = marker na białej */
+  --board: #0B1F48;
+  --board-edge: #26346F;
+  --board-edge-hi: #4A5DA6;
   --board-ink: rgba(244, 251, 252, .92);
   --board-ink-soft: rgba(244, 251, 252, .55);
   --board-accent: var(--sun-400);
   --board-mark: var(--sea-300);
   --board-grain: .5;
+  --board-light: rgba(255, 255, 255, .07);
+  --board-shade: rgba(0, 0, 12, .32);
+  --stick-a: linear-gradient(180deg, #FFFFFF, #E6EEF2);
+  --stick-b: linear-gradient(180deg, #FFE6A3, #E9A83A);
 
-  --sel: rgba(47, 211, 224, .32);
+  --sel: rgba(72, 202, 228, .32);
   color-scheme: dark;
+
+  /* kanały kontaktu — barwy marek (tylko logo kanałów: czat, stopka, pasek) */
+  --brand-on: #FFFFFF;
+  --brand-whatsapp: #25D366;
+  --brand-whatsapp-deep: #128C7E;
+  --brand-messenger: radial-gradient(circle at 18% 100%, #0099FF 0%, #A033FF 60%, #FF5280 90%, #FF7061 100%);
+  --brand-instagram: radial-gradient(circle at 30% 107%, #FDF497 0%, #FDF497 5%, #FD5949 45%, #D6249F 60%, #285AEB 90%);
+  /* bilet na lekcję — papier w obu motywach */
+  --ticket-paper: #FBFAF4;
+  --ticket-ink: var(--ocean-900);
+  --ticket-ink-soft: rgba(3, 4, 94, .58);
+  --ticket-line: rgba(3, 4, 94, .16);
+  --ticket-stamp: var(--sea-600);
+  --ticket-stamp-ok: var(--mint-700);
+  --ticket-stamp-off: var(--coral-500);
+
+  /* Mini-Krzysztof (przewodnik) — barwy wzięte ze zdjęcia; te same w obu motywach */
+  --mk-skin: #F4CBA8;
+  --mk-skin-shade: #E0A983;
+  --mk-blush: #F29A86;
+  --mk-hair: #A97A4E;
+  --mk-hair-hi: #CFA06C;
+  --mk-hair-dark: #7E5534;
+  --mk-coat: #CDA67C;
+  --mk-coat-shade: #AE865D;
+  --mk-coat-hi: #E2C29C;
+  --mk-knit: #1B1D26;
+  --mk-knit-hi: #3A3F52;
+  --mk-glove: #15161C;
+  --mk-mug: #FBF6F1;
+  --mk-mug-shade: #E2D6CE;
+  --mk-mug-dot: #E98DA0;
+  --mk-eye: #23304A;
+  --mk-line: #3B2618;
+  --mk-steam: rgba(255, 255, 255, .8);
+  --mk-shadow: rgba(2, 6, 30, .32);
+
+  /* kartka z zeszytu w kratkę (Korzyści) i karteczka samoprzylepna */
+  --sheet: #0B1850;
+  --sheet-grid: rgba(168, 230, 244, .075);
+  --sheet-margin: rgba(255, 138, 122, .5);
+  --sheet-ink: var(--fg-strong);
+  --sheet-tick: var(--sun-400);
+  --sheet-marker: rgba(255, 209, 102, .2);
+  --note: var(--sun-300);
+  --note-ink: var(--ocean-900);
 }
 
 :root[data-theme="light"] {
-  --bg: #F1FAFC;
-  --bg-deep: #E2F4F8;
+  /* jasny — papier i atrament (granat jako kolor tekstu) */
+  --bg: #F3F8FB;
+  --bg-deep: #E5EFF7;
   --bg-elev: #FFFFFF;
-  --bg-elev-2: #F7FDFE;
-  --fg: #07223A;
-  --fg-strong: #031426;
-  --fg-body: rgba(7, 34, 58, .84);
-  --fg-mid: rgba(7, 34, 58, .66);
-  --fg-subtle: rgba(7, 34, 58, .46);
-  --accent: var(--sea-600);
-  --accent-strong: var(--sea-700);
-  --accent-deep: var(--ocean-800);
+  --bg-elev-2: #F8FBFD;
+  --fg: var(--ocean-900);
+  --fg-strong: #020338;
+  --fg-body: rgba(3, 4, 94, .86);
+  --fg-mid: rgba(3, 4, 94, .7);
+  --fg-subtle: rgba(3, 4, 94, .5);
+  --accent: var(--sea-700);
+  --accent-strong: var(--ocean-900);
+  --accent-deep: var(--ocean-900);
   --accent-ink: #FFFFFF;
-  --accent-glow: rgba(11, 127, 166, .3);
+  --accent-glow: rgba(2, 62, 138, .3);
+  --accent-2: var(--mint-700);
+  --accent-2-ink: #FFFFFF;
   --gold: var(--sun-500);
-  --border: rgba(8, 58, 94, .12);
-  --border-strong: rgba(8, 58, 94, .22);
-  --divider: rgba(8, 58, 94, .08);
-  --glass: rgba(255, 255, 255, .62);
-  --glass-strong: rgba(255, 255, 255, .88);
+  --border: rgba(3, 4, 94, .12);
+  --border-strong: rgba(3, 4, 94, .24);
+  --divider: rgba(3, 4, 94, .08);
+  --glass: rgba(255, 255, 255, .66);
+  --glass-strong: rgba(255, 255, 255, .9);
   --glass-hi: rgba(255, 255, 255, .9);
-  --input-bg: rgba(8, 58, 94, .04);
-  --shadow-1: 0 10px 24px -12px rgba(8, 58, 94, .28);
-  --shadow-2: 0 30px 60px -28px rgba(8, 58, 94, .4);
-  --shadow-glow: 0 18px 40px -16px rgba(11, 127, 166, .5), 0 4px 12px rgba(11, 127, 166, .16);
+  --input-bg: rgba(3, 4, 94, .04);
+  --scrim: rgba(3, 4, 94, .36);
+  --btn-primary: var(--royal);
+  --shadow-1: 0 10px 24px -12px rgba(3, 4, 94, .26);
+  --shadow-2: 0 30px 60px -28px rgba(3, 4, 94, .38);
+  --shadow-glow: 0 18px 40px -16px rgba(2, 62, 138, .5), 0 4px 12px rgba(2, 62, 138, .16);
+  --drop: 0 26px 34px rgba(3, 4, 94, .22);
 
-  --board: #FBFEFF;
-  --board-edge: #C7D7DF;
-  --board-edge-hi: #E9F2F6;
-  --board-ink: #0A3A63;
-  --board-ink-soft: rgba(10, 58, 99, .45);
-  --board-accent: #E0435A;
-  --board-mark: var(--sea-600);
+  --deep: var(--sea-700);
+  --deep-2: var(--ocean-900);
+
+  --pattern-dim: rgba(3, 4, 94, .045);
+  --pattern-lit: rgba(2, 62, 138, .38);
+  --beam: rgba(0, 150, 199, .12);
+
+  --board: #FFFFFF;
+  --board-edge: #C9D6E6;
+  --board-edge-hi: #EEF3F9;
+  --board-ink: var(--ocean-900);
+  --board-ink-soft: rgba(3, 4, 94, .45);
+  --board-accent: #D63D5A;
+  --board-mark: var(--sea-500);
   --board-grain: 0;
+  --board-light: rgba(255, 255, 255, .6);
+  --board-shade: rgba(3, 4, 94, .05);
+  --stick-a: linear-gradient(180deg, #0062A8, #03045E);
+  --stick-b: linear-gradient(180deg, #FF7A8A, #D63D5A);
 
-  --sel: rgba(11, 127, 166, .2);
+  --sel: rgba(2, 62, 138, .18);
   color-scheme: light;
+  --mk-steam: rgba(3, 4, 94, .32);
+  --mk-shadow: rgba(3, 4, 94, .18);
+  --sheet: #FFFFFF;
+  --sheet-grid: rgba(0, 98, 168, .1);
+  --sheet-margin: rgba(242, 84, 106, .55);
+  --sheet-ink: var(--ocean-900);
+  --sheet-tick: #D63D5A;
+  --sheet-marker: rgba(255, 209, 102, .6);
 }
 
 /* ── reset ───────────────────────────────────────────────────────────────── */
@@ -165,12 +269,27 @@ body {
   transition: background-color var(--dur-3) var(--ease-out), color var(--dur-3) var(--ease-out);
 }
 ::selection { background: var(--sel); }
-img, svg, video, canvas { display: block; max-width: 100%; }
+img, svg, video, canvas { display: block; }
+/* max-width tylko dla rastrów: svg bywa celowo szerszy od rodzica (kredowe obwódki, podpisy). */
+img, video { max-width: 100%; }
 button, input, textarea, select { font: inherit; color: inherit; }
 button { cursor: pointer; background: none; border: 0; padding: 0; }
 a { color: inherit; text-decoration: none; }
 h1, h2, h3, h4, p { margin: 0; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 8px; }
+main:focus { outline: none; }
+
+.skip {
+  position: fixed; left: 12px; top: 12px; z-index: 200;
+  padding: 12px 18px; border-radius: var(--r-pill);
+  background: var(--bg-elev); color: var(--fg-strong); font-weight: 700;
+  border: 1px solid var(--accent);
+  transform: translateY(-160%); transition: transform var(--dur-2) var(--ease-out);
+}
+.skip:focus-visible { transform: none; }
+
+/* kotwice pod stałą nawigacją (działa też bez JS i bez Lenisa) */
+section[id], [id^="faq-"], #opinie_mobile, #main { scroll-margin-top: calc(var(--nav-h) + 24px); }
 
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
@@ -179,7 +298,7 @@ h1, h2, h3, h4, p { margin: 0; }
 
 /* ── wspólne klocki ──────────────────────────────────────────────────────── */
 .wrap { width: 100%; max-width: calc(var(--max) + var(--gutter) * 2); margin: 0 auto; padding: 0 var(--gutter); }
-.section { position: relative; padding: clamp(80px, 12vw, 160px) 0; }
+.section { position: relative; padding: clamp(72px, 9vw, 132px) 0; }
 
 .eyebrow {
   display: inline-flex; align-items: center; gap: 10px;
@@ -204,8 +323,8 @@ h1, h2, h3, h4, p { margin: 0; }
 .h-section {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(36px, 5.6vw, 84px);
-  line-height: .98;
+  font-size: clamp(34px, 4.6vw, 70px);
+  line-height: 1;
   letter-spacing: -.03em;
   color: var(--fg-strong);
 }
@@ -229,7 +348,7 @@ h1, h2, h3, h4, p { margin: 0; }
   animation: kk-sheen 6s linear infinite;
 }
 :root[data-theme="light"] .text-sea {
-  background: linear-gradient(120deg, var(--sea-700), var(--sea-500) 40%, var(--ocean-800) 70%, var(--sea-600));
+  background: linear-gradient(120deg, var(--sea-700), var(--sea-500) 40%, var(--ocean-900) 70%, var(--sea-600));
   background-size: 220% 100%;
   -webkit-background-clip: text; background-clip: text;
 }
@@ -253,17 +372,29 @@ h1, h2, h3, h4, p { margin: 0; }
 .btn:hover { transform: translateY(-2px); border-color: var(--accent); }
 .btn:active { transform: translateY(0) scale(.97); transition-duration: 80ms; }
 .btn:disabled { opacity: .45; pointer-events: none; }
+/* Połysk przycisków: gradient leży na pseudo-elemencie (dwa kafle obok siebie), a płynie
+   sam transform: kompozytor przesuwa warstwę, główny wątek nie przemalowuje tła w każdej klatce.
+   Przesunięcie o dokładnie jeden kafel = pętla bez szwu. Przyciski są kryjące, więc rozmycie tła
+   (backdrop-filter) niczego tu nie dawało — a kosztowało osobną warstwę na każdy przycisk. */
+.btn--primary, .btn--gold {
+  backdrop-filter: none; border-color: transparent;
+  overflow: clip; overflow-clip-margin: border-box; /* gradient sięga pod obwódkę, jak dawne tło */
+}
+.btn--primary { background: var(--accent); }
+.btn--gold { background: var(--gold); }
+.btn--primary::before, .btn--gold::before {
+  content: ""; position: absolute; z-index: -2; top: -1px; bottom: -1px; left: -220%; width: 440%;
+  background-repeat: repeat-x; background-size: 50% 100%; pointer-events: none;
+  animation: kk-slide 6s linear infinite;
+}
+.btn--primary::before { background-image: var(--btn-primary); }
+.btn--gold::before { background-image: var(--sun-metallic); }
 .btn--primary {
   color: var(--accent-ink);
-  background: var(--sea-metallic);
-  background-size: 220% 100%;
-  border-color: transparent;
   box-shadow: var(--shadow-glow);
-  animation: kk-sheen 6s linear infinite;
 }
-:root[data-theme="light"] .btn--primary { background: linear-gradient(120deg, var(--sea-600), var(--sea-500) 45%, var(--sea-700)); background-size: 220% 100%; }
 .btn--primary:hover { box-shadow: 0 24px 54px -14px var(--accent-glow), 0 0 0 4px var(--sel); }
-.btn--gold { color: var(--ocean-950); background: var(--sun-metallic); background-size: 220% 100%; border-color: transparent; animation: kk-sheen 6s linear infinite; }
+.btn--gold { color: var(--ocean-950); }
 .btn--ghost { background: transparent; }
 .btn--sm { min-height: 40px; padding: 0 18px; font-size: 14px; }
 .btn .ripple {
@@ -342,18 +473,24 @@ textarea.input { min-height: 120px; resize: vertical; line-height: 1.5; }
 [data-reveal] { opacity: 0; transform: translateY(28px); transition: opacity var(--dur-4) var(--ease-out), transform var(--dur-4) var(--ease-out); transition-delay: var(--d, 0ms); }
 [data-reveal][data-in="1"] { opacity: 1; transform: none; }
 
-/* ziarno papieru/szumu nad całością — bardzo subtelne */
+/* Bez JavaScriptu cała treść jest widoczna od razu (wejścia to tylko ozdoba). */
+@media (scripting: none) {
+  [data-reveal], .lw__in, .kt__c { opacity: 1 !important; transform: none !important; }
+}
+
+/* ziarno papieru/szumu nad całością — bardzo subtelne. Statyczne i na rozmiar ekranu:
+   dawna wersja (200% x 200%, ciągły ruch) trzymała w pamięci ogromną warstwę, którą kompozytor
+   mieszał z całą stroną w każdej klatce przewijania. */
 .grain {
-  position: fixed; inset: -50%; z-index: 90; pointer-events: none; opacity: .045;
+  position: fixed; inset: 0; z-index: 90; pointer-events: none; opacity: .045;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-  animation: kk-grain 1.2s steps(6) infinite;
 }
 :root[data-theme="light"] .grain { opacity: .035; }
 
 @keyframes kk-sheen { to { background-position: -220% 0; } }
+@keyframes kk-slide { to { transform: translateX(50%); } }
 @keyframes kk-ripple { to { transform: scale(4); opacity: 0; } }
 @keyframes kk-shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
-@keyframes kk-grain { 0% { transform: translate(0, 0); } 20% { transform: translate(-4%, 3%); } 40% { transform: translate(3%, -5%); } 60% { transform: translate(-6%, 2%); } 80% { transform: translate(5%, 4%); } 100% { transform: translate(0, 0); } }
 @keyframes kk-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 @keyframes kk-spin { to { transform: rotate(360deg); } }
 @keyframes kk-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }

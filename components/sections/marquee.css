@@ -1,5 +1,4 @@
 .mq {
-  --skew: 0;
   position: relative; z-index: 2;
   padding: clamp(28px, 4vw, 48px) 0;
   overflow: hidden;
@@ -7,7 +6,8 @@
   border-block: 1px solid var(--divider);
   display: grid; gap: 10px;
 }
-.mq__lane { overflow: hidden; transform: skewX(calc(var(--skew) * 1deg)); }
+.mq__lane { overflow: hidden; }
+/* przechył z prędkości przewijania: GSAP ustawia transform bezpośrednio na pasie (bez zmiennej na korzeniu) */
 .mq__track { display: flex; width: max-content; will-change: transform; }
 .mq__set { display: flex; flex: none; }
 .mq__item { display: inline-flex; align-items: center; gap: clamp(18px, 2.4vw, 34px); padding-right: clamp(18px, 2.4vw, 34px); }
@@ -15,9 +15,11 @@
   font: 700 clamp(32px, 5.4vw, 76px)/1 var(--font-display);
   letter-spacing: -.035em;
   color: var(--fg-strong);
-  transition: color var(--dur-2), font-variation-settings var(--dur-3) var(--ease-spring);
-  font-variation-settings: "wght" 700, "wdth" 100;
+  transition: color var(--dur-2), -webkit-text-stroke-color var(--dur-2);
 }
 .mq__lane--1 .mq__txt { color: transparent; -webkit-text-stroke: 1.4px var(--border-strong); }
-.mq__item:hover .mq__txt { color: var(--accent); -webkit-text-stroke: 0; font-variation-settings: "wght" 800, "wdth" 80; }
+.mq__item:hover .mq__txt { color: var(--accent); -webkit-text-stroke: 0; }
 .mq__dot { font: 700 clamp(20px, 3vw, 40px)/1 var(--font-chalk); color: var(--gold); }
+.mq__dot { display: inline-block; transition: transform var(--dur-3) var(--ease-spring); }
+.mq__item:hover .mq__dot { transform: rotate(-14deg) scale(1.15); }
+@media (prefers-reduced-motion: reduce) { .mq__item:hover .mq__dot { transform: none; } }

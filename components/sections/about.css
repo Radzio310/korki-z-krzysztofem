@@ -1,53 +1,96 @@
-.about { background: var(--bg); overflow: hidden; }
-.about__grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(40px, 7vw, 110px); align-items: center; }
-.about__photowrap { position: relative; perspective: 1200px; padding: 8%; }
-.about__ring { position: absolute; inset: -4%; pointer-events: none; }
-.about__ring text { font: 700 11.5px var(--font-body); letter-spacing: .32em; text-transform: uppercase; fill: var(--fg-subtle); }
-.about__photo {
-  position: relative;
-  aspect-ratio: 4 / 5;
-  border-radius: 46% 46% var(--r-xl) var(--r-xl) / 34% 34% var(--r-xl) var(--r-xl);
-  overflow: hidden;
-  background: var(--bg-elev);
-  border: 1px solid var(--border-strong);
-  box-shadow: var(--shadow-2), 0 0 0 10px color-mix(in oklab, var(--accent) 8%, transparent);
-  transform-style: preserve-3d;
-  will-change: transform;
-}
-.about__photo img { width: 100%; height: 100%; object-fit: cover; }
-.about__glare {
-  position: absolute; inset: 0; pointer-events: none; mix-blend-mode: soft-light;
-  background: radial-gradient(40% 40% at var(--glow-x) var(--glow-y), rgba(255, 255, 255, .55), transparent 70%);
-}
-.about__mono { position: absolute; inset: 0; display: grid; place-items: center; background: linear-gradient(180deg, var(--bg-elev-2), var(--bg-elev)); }
-.about__mono svg { width: 78%; height: auto; overflow: visible; }
-.about__mono text { font: 800 220px/1 var(--font-display); }
-.about__mono-bg { fill: color-mix(in oklab, var(--accent) 14%, transparent); }
-.about__wave { animation: about-wave 6s linear infinite; }
-.about__wave--1 { fill: var(--sea-500); opacity: .75; }
-.about__wave--2 { fill: var(--sea-700); animation-duration: 9s; animation-direction: reverse; }
-:root[data-theme="light"] .about__wave--1 { fill: var(--sea-400); }
-:root[data-theme="light"] .about__wave--2 { fill: var(--sea-600); }
-@keyframes about-wave { from { transform: translateX(0); } to { transform: translateX(-200px); } }
+.ab { background: var(--bg); }
+.ab__grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(40px, 7vw, 110px); align-items: center; }
+.ab__visual { position: relative; width: 100%; max-width: 500px; justify-self: center; display: grid; justify-items: center; gap: 6px; }
+.ab__stagewrap { position: relative; width: 100%; }
+.ab__stagewrap .pt { z-index: 1; }
 
-.about__copy { display: grid; gap: 22px; justify-items: start; }
-.about__facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; width: 100%; margin: 6px 0 0; }
-.about__fact { padding: 18px 20px; border-radius: var(--r-md); border: 1px solid var(--border); background: var(--input-bg); }
-.about__fact dt { font: 800 clamp(30px, 3.4vw, 44px)/1 var(--font-display); letter-spacing: -.03em; color: var(--accent); }
-.about__fact dd { margin: 8px 0 0; font-size: 14px; color: var(--fg-mid); font-weight: 600; }
-.about__values { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 4px; width: 100%; }
-.about__values li {
-  display: grid; grid-template-columns: 150px 1fr; gap: 16px; align-items: baseline;
-  padding: 16px 0; border-top: 1px solid var(--divider);
-  transition: padding var(--dur-3) var(--ease-spring), background var(--dur-3);
+/* napis po DOLNYM łuku wokół koła — z dala od twarzy */
+.ab__ring { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 2; }
+.ab__ring text { font: 700 3.5px var(--font-body); letter-spacing: .24em; text-transform: uppercase; fill: var(--fg-mid); }
+
+/* podpis pod portretem, z kreską pisaną kredą */
+.ab__sign {
+  position: relative; display: grid; justify-items: center;
+  margin-top: clamp(26px, 3.4vw, 40px); /* pod napisem z łuku, nie na nim */
+  font-size: clamp(28px, 3vw, 40px); font-weight: 700; line-height: 1; color: var(--gold);
+  rotate: -4deg; pointer-events: none;
 }
-.about__values li:hover { padding-left: 12px; }
-.about__values strong { font: 700 20px/1.2 var(--font-display); color: var(--fg-strong); }
-.about__values li:hover strong { color: var(--accent); }
-.about__values span { color: var(--fg-mid); }
+.ab__sign svg { width: 108%; height: 14px; margin-top: 2px; overflow: visible; }
+.ab__sign path {
+  fill: none; stroke: var(--gold); stroke-width: 2.6; stroke-linecap: round; vector-effect: non-scaling-stroke;
+  /* kreska podpisu = stroke-dashoffset (atrybut SVG), raz po wejściu */
+  stroke-dasharray: 1; stroke-dashoffset: 1;
+  transition: stroke-dashoffset 900ms var(--ease-out) 600ms;
+}
+.ab__sign[data-in="1"] path { stroke-dashoffset: 0; }
+
+.ab__copy { display: grid; gap: 22px; justify-items: start; min-width: 0; }
+.ab__copy .h-section { max-width: 12ch; }
+.ab__body { max-width: 58ch; }
+.ab__mark { position: relative; z-index: 0; background: none; color: inherit; transition: color var(--dur-3); }
+.ab__mark::after {
+  content: ""; position: absolute; z-index: -1; left: -2px; right: -2px; bottom: -.08em; height: .32em;
+  background: var(--gold);
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 12' preserveAspectRatio='none'><path d='M1 7 C 18 4, 36 9, 54 6 S 86 4, 99 7' stroke='black' stroke-width='5' fill='none' stroke-linecap='round' stroke-dasharray='26 1.6 9 1.2 30 2 14 1'/></svg>") center / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 12' preserveAspectRatio='none'><path d='M1 7 C 18 4, 36 9, 54 6 S 86 4, 99 7' stroke='black' stroke-width='5' fill='none' stroke-linecap='round' stroke-dasharray='26 1.6 9 1.2 30 2 14 1'/></svg>") center / 100% 100% no-repeat;
+  transform: scaleX(0); transform-origin: 0 50%;
+  transition: transform 520ms var(--ease-out);
+}
+.ab__mark.is-on { color: var(--fg-strong); }
+.ab__mark.is-on::after { transform: none; }
+
+/* ── równanie pisane kredą ─────────────────────────────────────────────── */
+.ab__eq { display: grid; gap: 10px; width: 100%; padding: 6px 0 4px; }
+.ab__eqlabel { font: 600 12.5px/1 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: var(--fg-subtle); }
+.ab__terms { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px clamp(8px, 1vw, 14px); }
+.ab__term {
+  position: relative;
+  min-height: 44px; padding: 0 2px;
+  font-size: clamp(30px, 3.2vw, 44px); font-weight: 700; line-height: 1.1;
+  color: var(--fg-strong);
+  opacity: 0; transform: translateY(14px) rotate(-3deg);
+  transition: opacity 500ms var(--ease-out), transform 700ms var(--ease-spring), color var(--dur-2);
+  transition-delay: calc(var(--s) * 120ms);
+}
+.ab__term--sum { color: var(--accent); }
+.ab__op {
+  font: 700 clamp(28px, 3vw, 40px)/1 var(--font-chalk); color: var(--gold);
+  display: inline-block;
+  opacity: 0; transform: scale(.3) rotate(-40deg);
+  transition: opacity 400ms var(--ease-out), transform 600ms var(--ease-spring);
+  transition-delay: calc(var(--s) * 120ms);
+}
+.ab__eq[data-in="1"] .ab__term, .ab__eq[data-in="1"] .ab__op { opacity: 1; transform: none; }
+.ab__eq[data-in="1"] .ab__term { transition-delay: calc(var(--s) * 120ms), calc(var(--s) * 120ms), 0ms; }
+.ab__term:hover, .ab__term[aria-pressed="true"] { color: var(--accent); }
+.ab__term--sum:hover, .ab__term--sum[aria-pressed="true"] { color: var(--accent-2); }
+.ab__scribble { position: absolute; left: 0; right: 0; bottom: 2px; width: 100%; height: 10px; overflow: visible; pointer-events: none; }
+.ab__scribble path {
+  fill: none; stroke: var(--gold); stroke-width: 2.4; stroke-linecap: round; vector-effect: non-scaling-stroke;
+  transform-box: fill-box; transform-origin: 0 50%;
+  transform: scaleX(0); transition: transform 420ms var(--ease-out);
+}
+.ab__term:hover .ab__scribble path, .ab__term[aria-pressed="true"] .ab__scribble path { transform: none; }
+.ab__note { min-height: 1.5em; font-size: 15.5px; font-weight: 600; color: var(--fg-mid); }
+
+/* liczby z panelu: bez kafelków, wielka cyfra + podpis */
+.ab__facts { display: flex; flex-wrap: wrap; gap: 18px clamp(24px, 4vw, 48px); width: 100%; margin: 0; }
+.ab__fact dt { font: 800 clamp(34px, 3.6vw, 52px)/1 var(--font-display); letter-spacing: -.03em; color: var(--accent); }
+.ab__fact dd { margin: 6px 0 0; font-size: 14px; color: var(--fg-mid); font-weight: 600; }
+.ab__cta { display: flex; flex-wrap: wrap; gap: 12px; }
 
 @media (max-width: 899px) {
-  .about__grid { grid-template-columns: 1fr; }
-  .about__photowrap { max-width: 420px; margin: 0 auto; width: 100%; }
-  .about__values li { grid-template-columns: 1fr; gap: 4px; }
+  .ab__grid { grid-template-columns: 1fr; }
+  .ab__visual { max-width: min(400px, 84vw); }
+}
+@media (max-width: 420px) {
+  .ab__cta .btn { flex: 1 1 100%; }
+}
+@media (scripting: none) {
+  .ab__term, .ab__op { opacity: 1; transform: none; }
+  .ab__sign path { stroke-dashoffset: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ab__term, .ab__op { opacity: 1; transform: none; }
+  .ab__sign path { stroke-dashoffset: 0; }
 }

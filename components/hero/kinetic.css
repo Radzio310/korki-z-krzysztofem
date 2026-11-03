@@ -1,0 +1,48 @@
+/* Żywy nagłówek (KineticTitle) — wspólny dla hero i nagłówków sekcji.
+   Twarda zasada: nic tu nie zmienia szerokości liter (waga, wdth, letter-spacing, font-size).
+   Ruch = translate/rotate + kolor na pudełku o stałym rozmiarze, łamanie wierszy stoi. */
+.kt { display: block; text-wrap: balance; }
+.kt__w { position: relative; display: inline-block; white-space: nowrap; }
+/* zapas od góry na uniesienie litery; ujemny margines oddaje go z powrotem, więc wiersz ma tę samą wysokość */
+.kt__m { display: inline-block; overflow: hidden; padding: .2em 0 .14em; margin: -.2em 0 -.14em; vertical-align: top; }
+.kt__c {
+  --k: 0;
+  display: inline-block;
+  color: color-mix(in oklab, var(--accent) calc(var(--k) * 72%), var(--fg-strong));
+  translate: 0 calc(var(--k) * -.1em);
+  rotate: calc(var(--k) * var(--tw, 0deg));
+  transition: translate 420ms var(--ease-spring), rotate 420ms var(--ease-spring), color 300ms var(--ease-out);
+  animation: kt-in 1s var(--ease-spring) backwards;
+  animation-delay: calc(140ms + var(--i) * 22ms);
+}
+.kt[data-reveal-mode="view"] .kt__c { animation-play-state: paused; }
+.kt[data-reveal-mode="view"][data-in="1"] .kt__c { animation-play-state: running; animation-delay: calc(var(--i) * 16ms); }
+@keyframes kt-in {
+  from { opacity: 0; transform: translateY(105%) rotate(var(--rot, 0deg)); }
+  to { opacity: 1; transform: none; }
+}
+
+.kt__w--accent .kt__c { color: color-mix(in oklab, var(--accent-2) calc(var(--k) * 80%), var(--accent)); }
+.kt__orbit {
+  position: absolute; left: -4%; right: -6%; bottom: -.1em; width: 110%; height: .32em;
+  overflow: visible; pointer-events: none;
+}
+.kt__orbit path {
+  fill: none; stroke: var(--accent-2); stroke-width: 3.2; stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1; stroke-dashoffset: 1;
+  /* rysowanie kreski = atrybut SVG stroke-dashoffset; jednorazowo, nie w pętli */
+  animation: kt-orbit 1.1s var(--ease-out) forwards;
+  animation-delay: 1.1s;
+}
+.kt[data-reveal-mode="view"] .kt__orbit path { animation-play-state: paused; }
+.kt[data-reveal-mode="view"][data-in="1"] .kt__orbit path { animation-play-state: running; animation-delay: .7s; }
+@keyframes kt-orbit { to { stroke-dashoffset: 0; } }
+
+@media (scripting: none) {
+  .kt__orbit path { stroke-dashoffset: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kt__c { animation: none; translate: none; rotate: none; }
+  .kt__orbit path { animation: none; stroke-dashoffset: 0; }
+}

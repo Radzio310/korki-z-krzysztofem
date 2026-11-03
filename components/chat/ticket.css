@@ -1,0 +1,119 @@
+/* Bilet: papier w obu motywach (tokeny --ticket-*). Drukowanie i oderwanie = transform. */
+
+.tkw { position: relative; width: 100%; max-width: 440px; }
+.tkw__printer {
+  position: relative; z-index: 2; height: 22px; margin: 0 -10px;
+  border-radius: 12px; background: var(--bg-deep); border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-1);
+  transition: opacity var(--dur-3) var(--ease-out), transform var(--dur-3) var(--ease-out);
+}
+.tkw__slot { position: absolute; left: 14px; right: 14px; bottom: 5px; height: 3px; border-radius: 3px; background: var(--abyss); }
+.tkw__led {
+  position: absolute; right: 12px; top: 5px; width: 5px; height: 5px; border-radius: 50%;
+  background: var(--success); animation: kk-pulse .5s steps(2) infinite;
+}
+.tkw.is-torn .tkw__led { animation: none; opacity: .4; }
+.tkw.is-torn .tkw__printer { opacity: 0; transform: translateY(-10px) scale(.96); }
+
+/* szczelina: przycina bilet tylko podczas drukowania (mały element, nie scena) */
+.tkw--print .tkw__feed { overflow: hidden; margin-top: -6px; padding: 0 2px 16px; }
+.tkw--print.is-torn .tkw__feed { overflow: visible; }
+.tkw--print .tk { animation: tk-feed 1.8s linear both; }
+.tkw--print.is-torn .tk { animation: tk-tear 620ms var(--ease-out) both; }
+
+/* przesuw z przystankami jak w drukarce paragonów */
+@keyframes tk-feed {
+  0% { transform: translateY(-100%); }
+  14% { transform: translateY(-84%); } 20% { transform: translateY(-84%); }
+  36% { transform: translateY(-60%); } 42% { transform: translateY(-60%); }
+  60% { transform: translateY(-34%); } 66% { transform: translateY(-34%); }
+  86% { transform: translateY(-8%); } 90% { transform: translateY(-8%); }
+  100% { transform: translateY(0); }
+}
+@keyframes tk-tear {
+  0% { transform: none; }
+  35% { transform: translateY(-4px) rotate(.6deg); }
+  100% { transform: translateY(8px) rotate(-1.4deg); }
+}
+
+.tk {
+  position: relative; display: grid; gap: 14px;
+  padding: 22px 22px 18px; border-radius: 4px 4px 18px 18px;
+  background: var(--ticket-paper); color: var(--ticket-ink);
+  box-shadow: var(--shadow-2);
+  transform-origin: 30% 0;
+}
+.tk__edge { position: absolute; left: 0; right: 0; top: -7px; width: 100%; height: 8px; fill: var(--ticket-paper); }
+.tk__head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.tk__brand { display: inline-flex; align-items: center; gap: 8px; font: 700 14px/1 var(--font-display); }
+.tk__brand em { font-family: var(--font-chalk); font-style: normal; font-size: 17px; color: var(--ticket-stamp); }
+.tk__nr { font: 700 11px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ticket-ink-soft); }
+
+.tk__when { display: grid; gap: 2px; }
+.tk__weekday { font: 700 12px/1 var(--font-body); letter-spacing: .2em; text-transform: uppercase; color: var(--ticket-stamp); }
+.tk__date { font: 750 clamp(28px, 4.4vw, 38px)/1.05 var(--font-display); letter-spacing: -.03em; }
+.tk__date small { font: 600 15px/1 var(--font-body); letter-spacing: 0; color: var(--ticket-ink-soft); }
+.tk__time { display: flex; align-items: center; gap: 10px; margin-top: 6px; font: 700 22px/1 var(--font-display); font-variant-numeric: tabular-nums; }
+.tk__time svg { width: 34px; height: 12px; fill: none; stroke: var(--ticket-ink-soft); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.tk__dur { margin-left: auto; padding: 5px 10px; border-radius: 999px; border: 1.5px solid var(--ticket-line); font: 700 12.5px/1 var(--font-body); color: var(--ticket-ink-soft); }
+
+.tk__perf { position: relative; height: 2px; margin: 2px -22px; background: repeating-linear-gradient(90deg, var(--ticket-line) 0 7px, transparent 7px 13px); }
+.tk__perf::before, .tk__perf::after {
+  content: ""; position: absolute; top: -9px; width: 20px; height: 20px; border-radius: 50%;
+  background: var(--tk-notch, var(--bg-elev));
+}
+.tk__perf::before { left: -10px; }
+.tk__perf::after { right: -10px; }
+
+.tk__grid { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; }
+.tk__grid div { min-width: 0; }
+.tk__grid dt { font: 700 10.5px/1 var(--font-body); letter-spacing: .14em; text-transform: uppercase; color: var(--ticket-ink-soft); }
+.tk__grid dd { margin: 4px 0 0; font: 700 15px/1.3 var(--font-body); overflow-wrap: anywhere; }
+
+.tk__foot { display: grid; gap: 14px; }
+.tk__code { width: 100%; height: 26px; fill: var(--ticket-ink); opacity: .82; }
+.tk__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.tk__actions a, .tk__actions button {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 42px; padding: 0 16px; border-radius: 999px;
+  font: 700 14px/1 var(--font-body); color: var(--ticket-ink); border: 1.5px solid var(--ticket-line);
+  transition: transform var(--dur-2) var(--ease-spring), border-color var(--dur-2), background var(--dur-2);
+}
+.tk__actions a:hover, .tk__actions button:hover { border-color: var(--ticket-ink); transform: translateY(-2px); }
+.tk__actions a:focus-visible, .tk__actions button:focus-visible { outline: 2px solid var(--ticket-stamp); outline-offset: 2px; }
+.tk__actions svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.tk__actions .is-main { background: var(--ticket-ink); color: var(--ticket-paper); border-color: transparent; }
+
+/* pieczęć statusu — w pudełku przycinanym do biletu, żeby wejście (skala) nie poszerzało strony */
+.tk__stamp { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; pointer-events: none; }
+.tk__stamp-ring {
+  position: absolute; right: 16px; bottom: 58px;
+  display: grid; place-items: center; width: 96px; height: 96px; padding: 10px; border-radius: 50%;
+  border: 3px double var(--ticket-stamp); color: var(--ticket-stamp);
+  font: 800 11px/1.15 var(--font-body); letter-spacing: .1em; text-transform: uppercase; text-align: center;
+  transform: rotate(-14deg); opacity: .8;
+}
+.tk__stamp-ring { align-content: center; gap: 3px; letter-spacing: .06em; }
+.tk__stamp-ring small { font: 700 8px/1 var(--font-mono); letter-spacing: .16em; opacity: .8; }
+.tk[data-status="confirmed"] .tk__stamp-ring, .tk[data-status="done"] .tk__stamp-ring { border-color: var(--ticket-stamp-ok); color: var(--ticket-stamp-ok); }
+.tk[data-status="cancelled"] .tk__stamp-ring, .tk[data-status="no_show"] .tk__stamp-ring { border-color: var(--ticket-stamp-off); color: var(--ticket-stamp-off); }
+.tk[data-status="cancelled"] .tk__date, .tk[data-status="cancelled"] .tk__time b { text-decoration: line-through; text-decoration-thickness: 2px; text-decoration-color: var(--ticket-stamp-off); }
+.tkw--print .tk__stamp-ring { opacity: 0; }
+.tkw--print.is-torn .tk__stamp-ring { animation: tk-stamp 520ms var(--ease-out) 380ms both; }
+.tkw:not(.tkw--print) .tk__stamp-ring { animation: tk-stamp 520ms var(--ease-out) 300ms both; }
+@keyframes tk-stamp {
+  0% { opacity: 0; transform: rotate(-14deg) scale(1.7); }
+  70% { opacity: .8; transform: rotate(-14deg) scale(.97); }
+  100% { opacity: .8; transform: rotate(-14deg) scale(1); }
+}
+
+@media (max-width: 420px) {
+  .tk { padding: 20px 18px 16px; }
+  .tk__perf { margin: 2px -18px; }
+  .tk__stamp-ring { width: 80px; height: 80px; font-size: 9.5px; right: 10px; bottom: 54px; }
+  .tk__time { font-size: 19px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tkw--print .tk, .tkw--print.is-torn .tk, .tk__stamp-ring { animation: none !important; }
+  .tkw--print .tk__stamp-ring { opacity: .8; }
+  .tkw--print .tkw__feed { overflow: visible; }
+}

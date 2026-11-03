@@ -2,15 +2,25 @@
 .mg__top { display: flex; justify-content: space-between; align-items: center; padding-top: 22px; padding-bottom: 22px; }
 .mg__brand { display: flex; align-items: center; gap: 12px; font: 700 18px/1 var(--font-display); color: var(--fg-strong); }
 .mg__brand em { font-family: var(--font-chalk); font-style: normal; color: var(--accent); font-size: 22px; }
-.mg__body { display: grid; place-items: center; padding-top: 40px; padding-bottom: 80px; }
-.mg__card { width: min(620px, 100%); padding: clamp(24px, 4vw, 44px); display: grid; justify-items: center; gap: 24px; text-align: center; }
-.mg__card .bk__ticket { text-align: left; }
-.mg__loading { display: flex; gap: 12px; align-items: center; color: var(--fg-mid); font-weight: 700; padding: 80px 0; }
-.mg__dl { margin: 8px 0 0; display: grid; }
-.mg__dl div { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-top: 1px solid var(--divider); font-size: 14.5px; }
-.mg__dl dt { color: var(--fg-mid); }
-.mg__dl dd { margin: 0; font-weight: 700; color: var(--fg-strong); text-align: right; }
-.mg__cancel { font-weight: 700; color: var(--danger); text-decoration: underline; text-underline-offset: 4px; }
-.mg__confirm { width: 100%; display: grid; gap: 14px; text-align: left; animation: bk-in 400ms var(--ease-out) both; }
+.mg__body { display: grid; grid-template-columns: minmax(0, 1fr); place-items: start center; padding-top: 24px; padding-bottom: 80px; }
+.mg__col { width: min(520px, 100%); display: grid; gap: 18px; }
+.mg__col .kc-b { max-width: 100%; }
+.mg__say { display: grid; gap: 6px; }
+.mg__muted { font-size: 14px; color: var(--fg-mid); }
+.mg__label { display: block; font: 700 11px/1.2 var(--font-body); letter-spacing: .12em; text-transform: uppercase; color: var(--fg-mid); margin-bottom: 4px; }
+.mg__ticket { --tk-notch: var(--bg); padding: 8px 0 6px 44px; }
+.mg__ticket .tkw { max-width: none; }
+.mg__skel { height: 360px; margin-left: 44px; border-radius: 4px 4px 18px 18px; background: var(--input-bg); animation: kk-pulse 1.4s var(--ease-io) infinite; }
 .mg__row { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
-.mg__danger { background: var(--danger); color: #fff; border-color: transparent; }
+.mg__cancel { justify-self: start; margin-left: 44px; font-weight: 700; color: var(--danger); text-decoration: underline; text-underline-offset: 4px; padding: 8px 0; }
+.mg__confirm {
+  display: grid; gap: 14px; margin-left: 44px; padding: 18px; border-radius: 22px;
+  background: color-mix(in oklab, var(--danger) 8%, var(--bg-elev)); border: 1px solid color-mix(in oklab, var(--danger) 35%, transparent);
+  animation: kc-in 420ms var(--ease-out) both;
+}
+.mg__confirm-title { font: 700 18px/1.2 var(--font-display); color: var(--fg-strong); }
+.mg__danger { background: var(--danger); color: var(--brand-on); border-color: transparent; }
+.mg__danger[aria-disabled="true"] { opacity: .75; pointer-events: none; }
+@media (max-width: 520px) {
+  .mg__ticket, .mg__skel, .mg__cancel, .mg__confirm { margin-left: 0; padding-left: 0; }
+}

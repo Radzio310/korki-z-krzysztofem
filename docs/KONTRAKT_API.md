@@ -86,7 +86,7 @@ Kalkulator: `cena_lekcji × lekcji_w_tygodniu × weeks_per_month`, rabat = najwy
 | POST | `/korki/public/daily-task/{id}/check` | `{ answer, reveal? }` → `{ correct, solution, answer }` — `solution` i `answer` są `null`, chyba że `correct` albo `reveal: true` |
 | GET | `/korki/public/quiz` | `{ rows: [ { id, level_key, prompt, options[] } ], total }` bez poprawnych, poziomami w kolejności `offer.levels` |
 | POST | `/korki/public/quiz/score` | `{ answers: [ { id, choice } ], seconds }` → wynik |
-| POST | `/korki/public/contact` | `{ name, email, phone?, message (5–4000), consent, website }` → 202 `{ ok: true }` |
+| POST | `/korki/public/contact` | `{ name (2–100), subjects: ("matematyka"\|"chemia")[] (≥1), level: "sp_1_4"\|"sp_5_8"\|"liceum"\|"inny", mode: "stationary"\|"online"\|"any", email?, phone?, class_info? (≤120), message? (≤3000), consent?, website }` — wymagany co najmniej jeden poprawny kontakt (e-mail albo telefon PL, front wysyła `+48XXXXXXXXX`) → 202 `{ ok: true, request_id }`; 400 `{ detail, errors: [ { loc: ["body", pole] } ] }`; 429 limit |
 
 ### POST `/korki/public/bookings`
 ```json
@@ -157,7 +157,7 @@ Rekomendacja: najwyższy poziom, w którym trafność ≥ 60%, w kolejności poz
 | GET/POST | `/korki/panel/quiz` | pytania quizu (`level_key, prompt, options[2..6], correct_index, explanation, sort, active`); POST → 201 |
 | PATCH/DELETE | `/korki/panel/quiz/{id}` | edycja (jak zadania, `version` opcjonalne) / usunięcie → 204 |
 | POST | `/korki/panel/starter-pack` | `{ kind: "quiz"|"tasks" }` → `{ kind, added, skipped, total }` — zestaw startowy z matematyki (12 pytań, 16 zadań; pomija duplikaty po `prompt`/`title`) |
-| GET | `/korki/panel/messages?limit=&offset=` | `{ id, name, email, phone, message, read, read_at, created_at }`, najnowsze najpierw |
+| GET | `/korki/panel/messages?limit=&offset=` | `{ id, name, email?, phone?, message?, subjects[], level, mode, class_info?, read, read_at, created_at }` (email/phone/message mogą być `null`; starsze rekordy bez nowych pól), najnowsze najpierw |
 | PATCH | `/korki/panel/messages/{id}` | `{ read: bool }` → rekord |
 
 Odpowiedź zadania dnia (`answer`): warianty rozdzielone `|` (np. `x=5|5`). Sprawdzanie: bez spacji, przecinek → kropka,

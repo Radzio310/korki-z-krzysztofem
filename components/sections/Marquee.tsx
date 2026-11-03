@@ -20,7 +20,9 @@ export default function Marquee({ items }: { items: string[] }) {
     const hovered = new Set<gsap.core.Tween>();
     let lastMove = 0;
     let skewed = false;
-    const skewTo = gsap.quickTo(el, "--skew", { duration: 0.5, ease: "power3" });
+    const lanesEl = Array.from(el.querySelectorAll<HTMLElement>(".mq__lane"));
+    const skews = lanesEl.map((l) => gsap.quickTo(l, "skewX", { duration: 0.5, ease: "power3" }));
+    const skewTo = (v: number) => skews.forEach((s) => s(v));
     const st = ScrollTrigger.create({
       trigger: el, start: "top bottom", end: "bottom top",
       onUpdate: (self) => {
@@ -33,7 +35,18 @@ export default function Marquee({ items }: { items: string[] }) {
       },
     });
     /* po zrywie wracamy łagodnie do spokojnego tempa (z zachowaniem kierunku) */
+    /* Poza ekranem taśma stoi — zero pracy w klatce, gdy jej nie widać. */
+    let onScreen = true;
+    const io = new IntersectionObserver(([e]) => {
+      onScreen = e.isIntersecting;
+      tweens.forEach((t) => (onScreen ? t.resume() : t.pause()));
+      /* will-change tylko, gdy taśma jest w ekranie: pochylenie pasa z prędkości przewijania
+         idzie wtedy na warstwie kompozytora, a nie przemalowuje wielkiego napisu w każdej klatce */
+      lanesEl.forEach((l) => { l.style.willChange = onScreen ? "transform" : "auto"; });
+    });
+    io.observe(el);
     const settle = () => {
+      if (!onScreen) return;
       if (skewed && performance.now() - lastMove > 140) { skewTo(0); skewed = false; }
       tweens.forEach((t) => {
         if (hovered.has(t)) return;
@@ -58,6 +71,7 @@ export default function Marquee({ items }: { items: string[] }) {
     lanes.forEach((l) => { l.addEventListener("pointerenter", pauseRow); l.addEventListener("pointerleave", pauseRow); });
     return () => {
       gsap.ticker.remove(settle);
+      io.disconnect();
       st.kill();
       tweens.forEach((t) => t.kill());
       lanes.forEach((l) => { l.removeEventListener("pointerenter", pauseRow); l.removeEventListener("pointerleave", pauseRow); });

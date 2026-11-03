@@ -1,9 +1,12 @@
-.reviews { background: var(--bg-deep); overflow: hidden; }
-.reviews__head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: clamp(30px, 4vw, 52px); }
-.reviews__head .h-section { margin-top: 16px; }
-.reviews__score { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-.reviews__score strong { font: 800 64px/1 var(--font-display); letter-spacing: -.04em; color: var(--fg-strong); }
-.reviews__score > div { display: grid; gap: 4px; }
+/* Opinie „Wielki głos”. Ruch: transform/opacity na słowach i podkreśleniach o stałym pudełku. */
+.vo { background: var(--bg-deep); overflow: clip; }
+.vo__alias { position: absolute; top: 0; left: 0; width: 1px; height: 1px; }
+.vo__head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: clamp(40px, 6vw, 80px); }
+.vo__titles { display: grid; gap: 16px; justify-items: start; max-width: 860px; }
+.vo__titles .h-section { max-width: 17ch; }
+.vo__score { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.vo__score strong { font: 800 64px/1 var(--font-display); letter-spacing: -.04em; color: var(--fg-strong); }
+.vo__score > div { display: grid; gap: 4px; }
 
 .stars { display: inline-flex; gap: 2px; }
 .stars__btn { transition: transform var(--dur-2) var(--ease-spring); }
@@ -11,45 +14,138 @@
 .stars__btn.is-on { animation: st-pop 380ms var(--ease-spring); }
 @keyframes st-pop { 50% { transform: scale(1.25); } }
 
-.reviews__rail {
-  --tilt: 0;
-  display: flex; gap: 18px;
-  overflow-x: auto; scroll-snap-type: x proximity;
-  padding: 12px max(var(--gutter), calc((100vw - var(--max)) / 2)) 30px;
-  scrollbar-width: none; cursor: grab;
-  outline: none;
+/* ── scena ─────────────────────────────────────────────────────────────── */
+.vo__stage { position: relative; padding-left: clamp(0px, 7vw, 120px); }
+.vo__mark {
+  position: absolute; left: 0; top: -.2em;
+  width: clamp(64px, 9vw, 132px); height: auto; overflow: visible;
+  pointer-events: none;
 }
-.reviews__rail::-webkit-scrollbar { display: none; }
-.reviews__rail.is-drag { cursor: grabbing; scroll-snap-type: none; user-select: none; }
-.rv {
-  position: relative; flex: none; margin: 0;
-  width: clamp(280px, 30vw, 380px);
-  padding: 28px 26px 24px;
-  display: flex; flex-direction: column; gap: 14px;
-  border-radius: var(--r-lg);
-  background: linear-gradient(180deg, var(--glass-hi), transparent 50%), var(--bg-elev);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-1);
-  scroll-snap-align: start;
-  transform: rotate(calc(var(--tilt) * 1deg)) translateY(calc(sin(var(--i) * 1.3) * 10px));
-  transition: transform var(--dur-4) var(--ease-spring), border-color var(--dur-3), box-shadow var(--dur-3);
+.vo__mark path {
+  fill: none; stroke: var(--gold); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  /* rysowanie kredą = stroke-dashoffset (atrybut SVG), jednorazowo przy każdej zmianie */
+  stroke-dasharray: 1; stroke-dashoffset: 1;
+  animation: vo-draw 900ms var(--ease-out) forwards;
 }
-.rv:hover { border-color: color-mix(in oklab, var(--accent) 45%, transparent); box-shadow: var(--shadow-2); transform: translateY(-8px) rotate(calc(var(--tilt) * 1deg)); }
-.rv--featured { background: linear-gradient(160deg, color-mix(in oklab, var(--accent) 20%, transparent), transparent 60%), var(--bg-elev); border-color: color-mix(in oklab, var(--accent) 35%, transparent); }
-.rv__quote { position: absolute; right: 18px; top: -12px; font: 800 120px/1 var(--font-display); color: var(--accent); opacity: .18; pointer-events: none; }
-.rv blockquote { margin: 0; color: var(--fg-body); font-size: 16px; line-height: 1.6; white-space: pre-line; }
-.rv blockquote.is-clamped { display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }
-.rv__more { align-self: flex-start; font-size: 13.5px; font-weight: 700; color: var(--accent); }
-.rv figcaption { margin-top: auto; display: flex; align-items: center; gap: 12px; padding-top: 14px; border-top: 1px solid var(--divider); }
-.rv figcaption b { display: block; color: var(--fg-strong); }
-.rv figcaption small { display: block; color: var(--fg-mid); font-size: 13px; }
-.rv__avatar { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; font: 800 18px/1 var(--font-display); color: var(--accent-ink); background: var(--sea-soft); flex: none; }
-.reviews__nav { display: flex; gap: 10px; justify-content: flex-end; }
-.reviews__arrow { width: 52px; height: 52px; border-radius: 50%; border: 1.5px solid var(--border-strong); font-size: 20px; color: var(--fg-strong); transition: all var(--dur-2) var(--ease-spring); }
-.reviews__arrow:hover { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); transform: scale(1.06); }
-.reviews__empty { display: grid; justify-items: center; gap: 22px; padding: 48px 24px; text-align: center; }
-.reviews__loading { display: flex; gap: 18px; overflow: hidden; }
-.reviews__loading span { flex: none; width: 340px; height: 260px; border-radius: var(--r-lg); background: var(--bg-elev); animation: kk-pulse 1.4s ease-in-out infinite; }
+.vo__mark path:nth-child(2) { animation-delay: 140ms; }
+@keyframes vo-draw { to { stroke-dashoffset: 0; } }
+
+.vo__deck { display: grid; touch-action: pan-y; cursor: grab; user-select: none; transition: transform 500ms var(--ease-spring), opacity 300ms var(--ease-out); }
+.vo__deck.is-drag { cursor: grabbing; transition: none; }
+.vo__q { grid-area: 1 / 1; margin: 0; display: grid; gap: clamp(24px, 3vw, 40px); align-content: start; visibility: hidden; }
+.vo__q.is-on, .vo__q.is-out { visibility: visible; }
+.vo__q.is-out { pointer-events: none; }
+
+.vo__text {
+  margin: 0;
+  font-family: var(--font-display); font-weight: 650;
+  letter-spacing: -.025em; line-height: 1.14;
+  color: var(--fg-strong);
+  text-wrap: pretty;
+  max-width: 24ch;
+}
+.vo__text--xl { font-size: clamp(30px, 4.6vw, 70px); max-width: 22ch; }
+.vo__text--l { font-size: clamp(26px, 3.7vw, 54px); max-width: 26ch; }
+.vo__text--m { font-size: clamp(22px, 2.9vw, 42px); max-width: 32ch; }
+
+.vo__w { position: relative; display: inline-block; opacity: 0; }
+.vo__q.is-on .vo__w { opacity: 1; animation: vo-in 760ms var(--ease-spring) backwards; animation-delay: calc(80ms + var(--i) * 26ms); }
+.vo__deck[data-dir="prev"] .vo__q.is-on .vo__w { animation-name: vo-in-prev; }
+.vo__q.is-out .vo__w { animation: vo-out 380ms var(--ease-out) forwards; animation-delay: calc(var(--i) * 6ms); }
+@keyframes vo-in { from { opacity: 0; transform: translate(.5em, .45em) rotate(4deg); } }
+@keyframes vo-in-prev { from { opacity: 0; transform: translate(-.5em, .45em) rotate(-4deg); } }
+@keyframes vo-out { from { opacity: 1; } to { opacity: 0; transform: translateY(-.35em); } }
+
+/* kluczowa fraza: barwa akcentu + podkreślenie kredą, rysowane słowo po słowie (scaleX) */
+.vo__w.is-key { color: var(--accent); }
+.vo__w.is-key::after {
+  content: ""; position: absolute; left: -.04em; right: -.04em; bottom: -.02em; height: .22em;
+  background: var(--gold);
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 12' preserveAspectRatio='none'><path d='M1 7 C 18 4, 36 9, 54 6 S 86 4, 99 7' stroke='black' stroke-width='5' fill='none' stroke-linecap='round' stroke-dasharray='26 1.6 9 1.2 30 2 14 1'/></svg>") center / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 12' preserveAspectRatio='none'><path d='M1 7 C 18 4, 36 9, 54 6 S 86 4, 99 7' stroke='black' stroke-width='5' fill='none' stroke-linecap='round' stroke-dasharray='26 1.6 9 1.2 30 2 14 1'/></svg>") center / 100% 100% no-repeat;
+  transform: scaleX(0); transform-origin: 0 50%;
+}
+.vo__w.is-key.is-join::after { right: -.32em; }
+.vo__q.is-on .vo__w.is-key::after { animation: vo-chalk 420ms var(--ease-out) forwards; animation-delay: calc(700ms + var(--i) * 26ms + var(--k) * 110ms); }
+@keyframes vo-chalk { to { transform: none; } }
+
+.vo__who { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.vo__q.is-on .vo__who { animation: vo-who 700ms var(--ease-out) 420ms backwards; }
+@keyframes vo-who { from { opacity: 0; transform: translateY(12px); } }
+.vo__avatar {
+  width: 56px; height: 56px; border-radius: 50%; flex: none;
+  display: grid; place-items: center;
+  font: 800 24px/1 var(--font-display); color: var(--accent-ink);
+  background: var(--sea-soft);
+}
+.vo__avatar[data-tone="1"], .vo__face[data-tone="1"] > span:first-child { background: var(--accent-2); color: var(--accent-2-ink); }
+.vo__avatar[data-tone="2"], .vo__face[data-tone="2"] > span:first-child { background: var(--sun-metallic); color: var(--ocean-950); }
+.vo__name b { display: block; font: 700 19px/1.2 var(--font-display); color: var(--fg-strong); }
+.vo__name small { display: block; font-size: 14.5px; color: var(--fg-mid); }
+
+.vo__drag { display: none; }
+
+/* ── pasek inicjałów z odliczaniem ─────────────────────────────────────── */
+.vo__nav { display: flex; align-items: center; gap: clamp(8px, 1.4vw, 16px); margin-top: clamp(36px, 5vw, 64px); padding-left: clamp(0px, 7vw, 120px); }
+.vo__arrow {
+  width: 48px; height: 48px; border-radius: 50%; flex: none;
+  display: grid; place-items: center;
+  border: 1px solid var(--border-strong); color: var(--fg-strong);
+  transition: border-color var(--dur-2), transform var(--dur-3) var(--ease-spring), background var(--dur-2);
+}
+.vo__arrow:hover { border-color: var(--accent); background: var(--input-bg); }
+.vo__arrow:active { transform: scale(.92); }
+.vo__faces { display: flex; align-items: center; gap: 6px; padding: 6px 2px; }
+.vo__face {
+  position: relative; width: 44px; height: 44px; border-radius: 50%; flex: none;
+  display: grid; place-items: center;
+  transition: transform 460ms var(--ease-spring);
+}
+.vo__face > span:first-child {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: grid; place-items: center;
+  font: 800 15px/1 var(--font-display); color: var(--accent-ink);
+  background: var(--sea-soft);
+  opacity: .5;
+  transition: opacity var(--dur-3), transform 460ms var(--ease-spring);
+}
+.vo__face:hover > span:first-child { opacity: .85; transform: translateY(-2px); }
+.vo__face.is-on { transform: scale(1.18); }
+.vo__face.is-on > span:first-child { opacity: 1; }
+.vo__ring { position: absolute; inset: 0; width: 100%; height: 100%; rotate: -90deg; overflow: visible; pointer-events: none; }
+.vo__ring circle {
+  fill: none; stroke: var(--accent); stroke-width: 2.4; stroke-linecap: round;
+  stroke-dasharray: 1; stroke-dashoffset: 1;
+  animation: vo-count linear forwards; animation-play-state: paused;
+}
+.vo[data-run="1"] .vo__ring circle { animation-play-state: running; }
+.vo:hover .vo__ring circle, .vo:focus-within .vo__ring circle { animation-play-state: paused; }
+@keyframes vo-count { to { stroke-dashoffset: 0; } }
+.vo__count { margin-left: auto; font: 600 14px/1 var(--font-mono); color: var(--fg-subtle); letter-spacing: .08em; }
+.vo__count b { font: 800 clamp(28px, 3vw, 40px)/1 var(--font-display); color: var(--fg-strong); letter-spacing: -.03em; margin-right: 4px; }
 
 .rv-form { display: grid; gap: 16px; }
 .rv-done { display: grid; justify-items: center; gap: 22px; padding: 30px 0 10px; }
+
+@media (max-width: 719px) {
+  .vo__stage { padding-left: 0; padding-top: 56px; }
+  .vo__mark { width: 58px; top: 0; }
+  .vo__avatar { width: 46px; height: 46px; font-size: 20px; }
+  .vo__drag { display: block; margin-top: 18px; font-size: 20px; color: var(--fg-subtle); }
+  .vo__nav { padding-left: 0; flex-wrap: wrap; justify-content: center; row-gap: 14px; }
+  .vo__faces { order: -1; width: 100%; justify-content: center; gap: 0; }
+  .vo__face { width: 38px; height: 38px; }
+  .vo__face > span:first-child { width: 30px; height: 30px; font-size: 13px; }
+  .vo__count { margin-left: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vo__q.is-on .vo__w, .vo__q.is-out .vo__w, .vo__q.is-on .vo__who { animation: none; }
+  .vo__q.is-out { visibility: hidden; }
+  .vo__w.is-key::after { transform: none; animation: none !important; }
+  .vo__mark path { animation: none; stroke-dashoffset: 0; }
+  .vo__ring { display: none; }
+}
+@media (scripting: none) {
+  .vo__ring, .vo__arrow, .vo__drag { display: none; }
+}
