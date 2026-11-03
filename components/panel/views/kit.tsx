@@ -561,12 +561,16 @@ export function PreviewFrame({ payload, device }: { payload: PreviewPayload; dev
    a to zamyka `position: fixed` w jego pudełku. Wysokość dolnego paska bierzemy z --pn-tab-h. */
 function Peek({ onClick, icon, label }: { onClick: () => void; icon: React.ReactNode; label: string }) {
   const [tab, setTab] = React.useState<string | null>(null);
+  const phone = useMedia("(max-width: 900px)");
   React.useEffect(() => {
     const shell = document.querySelector<HTMLElement>(".pn");
     const bar = shell ? getComputedStyle(shell).getPropertyValue("--pn-tab-h").trim() : "";
-    setTab(matchMedia("(max-width: 900px)").matches ? bar || "0px" : "0px");
+    setTab(bar || "64px");
   }, []);
   if (tab == null) return null;
+  /* web (wąskie okno): zwykły przycisk w treści — nic nie pływa nad szyną */
+  if (!phone) return <button type="button" className="ed ed-peek ed-peek--inline" onClick={onClick} aria-haspopup="dialog">{icon}{label}</button>;
+  /* telefon: nad dolnym paskiem, przy prawej krawędzi */
   return createPortal(
     <button type="button" className="ed ed-peek" style={{ "--ed-tab": tab } as React.CSSProperties} onClick={onClick} aria-haspopup="dialog">{icon}{label}</button>,
     document.body,

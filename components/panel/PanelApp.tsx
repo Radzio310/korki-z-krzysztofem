@@ -157,15 +157,23 @@ function Login({ onIn }: { onIn: (s: Session) => void }) {
           </div>
           <h1>Zaloguj się do panelu</h1>
           <p>Wpisz dane, które dostałeś od Radka.</p>
-          <label>
-            <span className="pn-label">Login</span>
-            <input className="pn-input" name="login" autoComplete="username" autoCapitalize="none" spellCheck={false} required autoFocus aria-invalid={!!error} />
-          </label>
-          <label className="pn-login__pass">
-            <span className="pn-label">Hasło</span>
-            <input className="pn-input" name="password" type={show ? "text" : "password"} autoComplete="current-password" required aria-invalid={!!error} />
-            <button type="button" onClick={() => setShow((v) => !v)} aria-pressed={show} aria-label={show ? "Ukryj hasło" : "Pokaż hasło"}>{show ? "Ukryj" : "Pokaż"}</button>
-          </label>
+          <div className="pn-lf">
+            <label className="pn-lf__label" htmlFor="pn-login">Login</label>
+            <div className="pn-lf__box">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8" /><path d="M4.5 20c1.2-3.6 4-5.4 7.5-5.4s6.3 1.8 7.5 5.4" /></svg>
+              <input id="pn-login" className="pn-lf__in" name="login" autoComplete="username" autoCapitalize="none" spellCheck={false} required autoFocus aria-invalid={!!error} />
+            </div>
+          </div>
+          <div className="pn-lf">
+            <label className="pn-lf__label" htmlFor="pn-pass">Hasło</label>
+            <div className="pn-lf__box">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5" /><path d="M8.5 10.5V8a3.5 3.5 0 017 0v2.5" /></svg>
+              <input id="pn-pass" className="pn-lf__in" name="password" type={show ? "text" : "password"} autoComplete="current-password" required aria-invalid={!!error} />
+              <button type="button" className="pn-lf__eye" onClick={() => setShow((v) => !v)} aria-pressed={show} aria-label={show ? "Ukryj hasło" : "Pokaż hasło"} title={show ? "Ukryj hasło" : "Pokaż hasło"}>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" /><circle cx="12" cy="12" r="3" />{show ? <path d="M4 20L20 4" /> : null}</svg>
+              </button>
+            </div>
+          </div>
           {error ? <p className="pn-login__err" role="alert">{error}</p> : null}
           <button className="pn-btn pn-login__submit" type="submit" disabled={busy}>
             {busy ? <i className="spinner" /> : <>Zaloguj się <span aria-hidden="true">→</span></>}
@@ -189,6 +197,11 @@ function Shell({ tab, go, logout, tick }: { tab: TabId; go: (t: TabId) => void; 
   const reloadCounts = overview.reload;
   React.useEffect(() => { if (tick) reloadCounts(); }, [tick]); // eslint-disable-line react-hooks/exhaustive-deps
   const c = overview.data?.counts;
+  const count: Partial<Record<TabId, number>> = {
+    rezerwacje: c?.bookings_pending || 0,
+    wiadomosci: c?.messages_unread || 0,
+    opinie: c?.reviews_pending || 0,
+  };
   const dot: Partial<Record<TabId, boolean>> = {
     rezerwacje: !!c?.bookings_pending,
     wiadomosci: !!c?.messages_unread,
@@ -207,7 +220,6 @@ function Shell({ tab, go, logout, tick }: { tab: TabId; go: (t: TabId) => void; 
   }, []);
 
   const cur = TABS.find((t) => t.id === tab)!;
-  const idx = TABS.findIndex((t) => t.id === tab);
   const phoneIdx = PHONE_TABS.includes(tab) ? PHONE_TABS.indexOf(tab) : 3;
   const moreTabs = TABS.filter((t) => !PHONE_TABS.includes(t.id));
   const moreDot = moreTabs.some((t) => dot[t.id]);
@@ -227,23 +239,27 @@ function Shell({ tab, go, logout, tick }: { tab: TabId; go: (t: TabId) => void; 
   return (
     <div className="pn pn-enter">
       <aside className="pn-rail" aria-label="Nawigacja panelu">
-        <a href="/" className="pn-rail__logo" target="_blank" rel="noopener" aria-label="Korki z Krzysztofem — otwórz stronę"><Mark size={52} /></a>
+        <a href="/" className="pn-rail__logo" target="_blank" rel="noopener" aria-label="Korki z Krzysztofem — otwórz stronę">
+          <Mark size={40} />
+          <span className="pn-rail__brand">Korki <em>z</em> Krzysztofem</span>
+        </a>
         <nav className="pn-rail__nav">
-          <span className="pn-rail__ind" style={{ transform: `translateY(${idx * 56}px)` }} aria-hidden="true" />
           {TABS.map((t) => (
-            <button key={t.id} type="button" className={`pn-rail__btn ${tab === t.id ? "is-on" : ""}`} onClick={() => go(t.id)} aria-current={tab === t.id ? "page" : undefined} aria-label={t.label}>
+            <button key={t.id} type="button" className={`pn-rail__btn ${tab === t.id ? "is-on" : ""}`} onClick={() => go(t.id)} aria-current={tab === t.id ? "page" : undefined}>
               <Icon name={t.icon} />
-              {dot[t.id] ? <span className="pn-badge" aria-hidden="true" /> : null}
-              <span className="pn-rail__tip" aria-hidden="true">{t.label}</span>
+              <span className="pn-rail__label">{t.label}</span>
+              {count[t.id] ? <b className="pn-rail__count" aria-label={`${count[t.id]} nowe`}>{count[t.id]}</b> : null}
+              <span className="pn-rail__tip" aria-hidden="true">{t.label}{count[t.id] ? ` · ${count[t.id]}` : ""}</span>
             </button>
           ))}
         </nav>
         <div className="pn-rail__foot">
-          <ThemeToggle />
-          <button type="button" className="pn-rail__btn" onClick={logout} aria-label="Wyloguj">
+          <button type="button" className="pn-rail__btn" onClick={logout}>
             <Icon name="wyloguj" />
+            <span className="pn-rail__label">Wyloguj</span>
             <span className="pn-rail__tip" aria-hidden="true">Wyloguj</span>
           </button>
+          <ThemeToggle />
         </div>
       </aside>
 

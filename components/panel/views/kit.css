@@ -204,3 +204,4 @@ input.ed-ink { display: inline-block; }
   .ed-doc__head { position: static; }
   .ed-save { margin-left: 0; }
 }
+.ed-peek--inline { position: static; justify-self: start; box-shadow: none; min-height: 44px; }
