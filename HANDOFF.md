@@ -13,7 +13,7 @@ Poprzedni handoff z chmury jest w historii gita (commit 98121fe). Decyzje właś
 - **Panel od nowa** (e584db7, decyzje: pamięć `korki-panel-decyzje`): logowanie dzielone z logo WK, „Dziś” + rozkład, cennik jak dokument z autozapisem i podglądem `/panel/podglad`, malowanie dostępności (telefon: dzień po dniu), zadania i quiz jako spis treści. Wdrożone na Vercel.
 
 ## Otwarte
-1. `KORKI_NOTIFY_EMAIL` (skrzynka Krzysztofa) — brak adresu, ustawić na Railway.
+1. `KORKI_NOTIFY_EMAIL` — na czas testów `radek.witkowicz9@gmail.com` (03.11); zmienić na adres Krzysztofa, gdy go podadzą. Powiadomienia WhatsApp odłożone (decyzja 03.11: zostajemy przy mailach; opcje: oficjalne Cloud API, CallMeBot, Telegram).
 2. Dostępność terminów w panelu → Dostępność (Krzysztof); bez niej czat oferuje tylko zapytanie.
 3. ~~Test dostawy maila~~ — zrobiony 23.10: rezerwacja testowa (id 1, odwołana) → „Rezerwacja przyjęta” i „Odwołanie lekcji przyjęte” w skrzynce odbiorczej Gmaila w ~30 s, link prowadzi na stronę Vercela. Od 23.10 nadawca `korki@catchapp.com.pl` (Railway `KORKI_FROM_EMAIL`, serwer bdf1c6d) — sprawdzone rezerwacją testową id 2 (odwołana), oba maile w skrzynce odbiorczej.
 4. Przełączenie domeny (instrukcja §14): Vercel → Domains, rekordy WWW w Hostingerze bez ruszania MX/SPF/DKIM; potem usunąć `KORKI_NOINDEX`, zmienić `KORKI_SITE_URL` na `https://korkizkrzysztofem.pl`.
